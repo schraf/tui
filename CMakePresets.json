@@ -1,0 +1,108 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 4,
+        "minor": 2,
+        "patch": 1
+    },
+    "configurePresets": [
+        {
+            "name": "debug",
+            "displayName": "Debug",
+            "description": "Debug build configuration",
+            "generator": "Unix Makefiles",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "release",
+            "displayName": "Release",
+            "description": "Release build configuration",
+            "generator": "Unix Makefiles",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "tui-debug",
+            "displayName": "TUI (Debug)",
+            "description": "Build tui library in debug mode",
+            "configurePreset": "debug",
+            "targets": [
+                "tui"
+            ]
+        },
+        {
+            "name": "tui-release",
+            "displayName": "TUI (Release)",
+            "description": "Build tui library in release mode",
+            "configurePreset": "release",
+            "targets": [
+                "tui"
+            ]
+        },
+        {
+            "name": "examples-debug",
+            "displayName": "Examples (Debug)",
+            "description": "Build examples in debug mode",
+            "configurePreset": "debug",
+            "targets": [
+                "example"
+            ]
+        },
+        {
+            "name": "examples-release",
+            "displayName": "Examples (Release)",
+            "description": "Build example in release mode",
+            "configurePreset": "release",
+            "targets": [
+                "example"
+            ]
+        }
+    ],
+    "workflowPresets": [
+        {
+            "name": "debug",
+            "displayName": "Debug Build",
+            "description": "Configure and build in debug mode",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "debug"
+                },
+                {
+                    "type": "build",
+                    "name": "tui-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "examples-debug"
+                }
+            ]
+        },
+        {
+            "name": "release",
+            "displayName": "Release Build",
+            "description": "Configure and build in release mode",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "release"
+                },
+                {
+                    "type": "build",
+                    "name": "tui-release"
+                },
+                {
+                    "type": "build",
+                    "name": "examples-release"
+                }
+            ]
+        }
+    ]
+}
