@@ -180,6 +180,11 @@ TUI_LayoutAlignCenter(TUI_Context ctx)
 void
 TUI_WindowBegin(TUI_Context ctx, int x, int y, int w, int h, const char* title)
 {
+    // Get window style attribute
+    TUI_Theme theme = TUI_GetActiveTheme(ctx);
+    TUI_Style style = theme.Window;
+    TUI_Attr  attr  = style.Normal;
+
     // Push current origin and clip rect
     if (ctx->StackPtr < TUI_MAX_STACK)
     {
@@ -198,17 +203,17 @@ TUI_WindowBegin(TUI_Context ctx, int x, int y, int w, int h, const char* title)
     int absY = ctx->Origin.Y + y;
 
     // Draw the window shadow
-    TUI_DrawShadow(ctx, x, y, w, h);
+    TUI_DrawShadow(ctx, attr, x, y, w, h);
 
     // Draw the window box
-    TUI_DrawBox(ctx, x, y, w, h, true);
+    TUI_DrawBox(ctx, attr, x, y, w, h, true);
 
     // Fill interior
     for (int row = 1; row < h - 1; row++)
     {
         for (int col = 1; col < w - 1; col++)
         {
-            TUI_RenderPut(ctx, absX + col, absY + row, " ", ctx->CurrentAttr);
+            TUI_RenderPut(ctx, absX + col, absY + row, " ", attr);
         }
     }
 
@@ -225,16 +230,16 @@ TUI_WindowBegin(TUI_Context ctx, int x, int y, int w, int h, const char* title)
 
         int tx = x + (w - titleLen - 2) / 2;
 
-        TUI_DrawChar(ctx, tx, y, " ");
+        TUI_DrawChar(ctx, attr, tx, y, " ");
         
         for (int i = 0; i < titleLen; i++)
         {
             char temp[2] = { title[i], '\0' };
 
-            TUI_DrawChar(ctx, tx + 1 + i, y, temp);
+            TUI_DrawChar(ctx, attr, tx + 1 + i, y, temp);
         }
 
-        TUI_DrawChar(ctx, tx + 1 + titleLen, y, " ");
+        TUI_DrawChar(ctx, attr, tx + 1 + titleLen, y, " ");
     }
 
     // Set new origin to inside the window (1 cell padding from border)

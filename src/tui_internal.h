@@ -35,9 +35,10 @@ typedef struct
 // │ Constants                                                          │
 // ╰────────────────────────────────────────────────────────────────────╯
 
-#define TUI_MAX_STACK    16
-#define TUI_OUT_BUF_INIT 8192
-#define TUI_DEFAULT_ATTR 0x07 // Light gray on black (classic DOS default)
+#define TUI_MAX_STACK       16
+#define TUI_MAX_THEME_STACK 8
+#define TUI_OUT_BUF_INIT    8192
+#define TUI_DEFAULT_ATTR    0x07 // Light gray on black (classic DOS default)
 
 // ╭────────────────────────────────────────────────────────────────────╮
 // │ State Tracking                                                     │
@@ -72,9 +73,6 @@ struct TUI_Context
     int       BufWidth;
     int       BufHeight;
 
-    // --- Current Drawing State ---
-    TUI_Attr CurrentAttr; // Current color attribute for drawing operations
-
     // --- Output Buffer (batched terminal writes) ---
     char* OutBuf;
     int   OutBufLen;
@@ -99,19 +97,24 @@ struct TUI_Context
     TUI_Direction LayoutDir;
     int           Indent;          // Persistent X indent applied at each new line
     bool          AlignCenter;     // One-shot: center the next widget horizontally
+
+	// --- Theming & Style Stack ---
+    TUI_Theme DefaultTheme;  // The base theme used when no overrides are present
+    TUI_Theme ThemeStack[TUI_MAX_THEME_STACK];
+    int ThemeStackPtr;
 };
 
 // ╭────────────────────────────────────────────────────────────────────╮
 // │ Internal Functions - Drawing (tui_draw.c)                          │
 // ╰────────────────────────────────────────────────────────────────────╯
 
-void TUI_DrawChar(TUI_Context ctx, int x, int y, const char* c);
-void TUI_DrawText(TUI_Context ctx, int x, int y, const char* text);
-void TUI_DrawBox(TUI_Context ctx, int x, int y, int w, int h, bool doubleLine);
-void TUI_FillRect(TUI_Context ctx, int x, int y, int w, int h, const char* c);
-void TUI_DrawHLine(TUI_Context ctx, int x, int y, int len, const char* c);
-void TUI_DrawVLine(TUI_Context ctx, int x, int y, int len, const char* c);
-void TUI_DrawShadow(TUI_Context ctx, int x, int y, int w, int h);
+void TUI_DrawChar(TUI_Context ctx, TUI_Attr attr, int x, int y, const char* c);
+void TUI_DrawText(TUI_Context ctx, TUI_Attr attr, int x, int y, const char* text);
+void TUI_DrawBox(TUI_Context ctx, TUI_Attr attr, int x, int y, int w, int h, bool doubleLine);
+void TUI_FillRect(TUI_Context ctx, TUI_Attr attr, int x, int y, int w, int h, const char* c);
+void TUI_DrawHLine(TUI_Context ctx, TUI_Attr attr, int x, int y, int len, const char* c);
+void TUI_DrawVLine(TUI_Context ctx, TUI_Attr attr, int x, int y, int len, const char* c);
+void TUI_DrawShadow(TUI_Context ctx, TUI_Attr attr, int x, int y, int w, int h);
 
 // ╭────────────────────────────────────────────────────────────────────╮
 // │ Internal Functions - Terminal (tui_terminal.c)                      │
@@ -139,6 +142,12 @@ void TUI_OutFree(TUI_Context ctx);
 void TUI_OutAppend(TUI_Context ctx, const char* data, int len);
 void TUI_OutAppendf(TUI_Context ctx, const char* fmt, ...);
 void TUI_OutFlush(TUI_Context ctx);
+
+// ╭────────────────────────────────────────────────────────────────────╮
+// │ Internal Functions - Themes & Style (tui_style.c)                  │
+// ╰────────────────────────────────────────────────────────────────────╯
+
+TUI_Theme TUI_GetActiveTheme(TUI_Context ctx);
 
 // ╭────────────────────────────────────────────────────────────────────╮
 // │ Internal Functions - Utility                                       │

@@ -77,24 +77,6 @@ TUI_RenderSetCtx(TUI_Context ctx)
     s_CurrentCtx = ctx;
 }
 
-void
-TUI_SetColor(TUI_Color fg, TUI_Color bg)
-{
-    if (s_CurrentCtx)
-    {
-        s_CurrentCtx->CurrentAttr = TUI_MakeAttr(fg, bg);
-    }
-}
-
-void
-TUI_SetAttr(TUI_Attr attr)
-{
-    if (s_CurrentCtx)
-    {
-        s_CurrentCtx->CurrentAttr = attr;
-    }
-}
-
 // ╭────────────────────────────────────────────────────────────────────╮
 // │ Output Buffer                                                      │
 // ╰────────────────────────────────────────────────────────────────────╯

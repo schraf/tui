@@ -43,8 +43,9 @@ TUI_Init(TUI_Context* ctx)
     c->Margin    = 0;
     c->LayoutDir = TUI_DIRECTION_VERTICAL;
 
-    // Current drawing attribute
-    c->CurrentAttr = TUI_DEFAULT_ATTR;
+    // Style and Themes
+    c->DefaultTheme = TUI_GetClassicTheme();
+    c->ThemeStackPtr = 0;
 
     // Initialize output buffer
     TUI_OutInit(c);
@@ -166,9 +167,6 @@ TUI_Begin(TUI_Context ctx)
     ctx->ClipRect.Y       = 0;
     ctx->ClipRect.W       = ctx->ScreenWidth;
     ctx->ClipRect.H       = ctx->ScreenHeight;
-
-    // Reset attribute to default
-    ctx->CurrentAttr = TUI_DEFAULT_ATTR;
 }
 
 void

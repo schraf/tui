@@ -104,11 +104,40 @@ typedef uint8_t TUI_Attr;
 
 TUI_Attr TUI_MakeAttr(TUI_Color fg, TUI_Color bg);
 
-// Set the current drawing color using separate fg/bg values.
-void TUI_SetColor(TUI_Color fg, TUI_Color bg);
+// ╭────────────────────────────────────────────────────────────────────╮
+// │ Styles & Themes                                                    │
+// ╰────────────────────────────────────────────────────────────────────╯
 
-// Set the current drawing color using a packed attribute.
-void TUI_SetAttr(TUI_Attr attr);
+// A Style defines the look of a widget across its interaction states
+typedef struct {
+    TUI_Attr Normal;   // Default state
+    TUI_Attr Hot;      // Focused or Hovered
+    TUI_Attr Active;   // Currently being pressed/interacted with
+} TUI_Style;
+
+// A Theme is a collection of styles for the entire UI
+typedef struct {
+    TUI_Style Window;      // Frame and background
+    TUI_Style Button;      // Standard buttons
+    TUI_Style Input;       // Text fields and checkboxes
+    TUI_Style Label;       // Static text
+    TUI_Style Selection;   // Highlighted items in lists/menus
+    TUI_Attr  Shadow;      // Color of the window drop-shadow
+} TUI_Theme;
+
+// Global theme control
+void TUI_SetTheme(TUI_Context ctx, const TUI_Theme theme);
+
+// Push a specific style override for the next widgets
+void TUI_PushTheme(TUI_Context ctx, const TUI_Theme theme);
+void TUI_PopTheme(TUI_Context ctx);
+
+// Helpers to grab standard themes
+TUI_Theme TUI_GetClassicTheme(void);
+TUI_Theme TUI_GetTurboTheme(void);
+TUI_Theme TUI_GetPaperTheme(void); 
+TUI_Theme TUI_GetMidnightTheme(void);
+TUI_Theme TUI_GetMonochromeTheme(void);
 
 // ╭────────────────────────────────────────────────────────────────────╮
 // │ Utility                                                            │

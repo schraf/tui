@@ -24,6 +24,7 @@ main(void)
 {
     TUI_Context ctx;
     TUI_Init(&ctx);
+    TUI_SetTheme(TUI_GetTurboTheme());
 
     // State
     Page  page           = PAGE_WELCOME;
@@ -41,8 +42,6 @@ main(void)
         int sw = TUI_GetScreenWidth(ctx);
         int sh = TUI_GetScreenHeight(ctx);
 
-        // Blue desktop background
-        TUI_SetColor(TUI_COLOR_WHITE, TUI_COLOR_BLUE);
         //TUI_FillRect(ctx, 0, 0, sw, sh, " ");
 
         // Status bar
@@ -57,8 +56,6 @@ main(void)
         int winH = 18;
         int winX = (sw - winW) / 2;
         int winY = (sh - winH) / 2;
-
-        TUI_SetColor(TUI_COLOR_WHITE, TUI_COLOR_CYAN);
 
         switch (page)
         {
