@@ -40,7 +40,7 @@ TUI_Init(TUI_Context* ctx)
     TUI_Context c = *ctx;
 
     // Default margin between widgets
-    c->Margin    = 1;
+    c->Margin    = 0;
     c->LayoutDir = TUI_DIRECTION_VERTICAL;
 
     // Current drawing attribute

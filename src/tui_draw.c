@@ -167,10 +167,16 @@ TUI_DrawShadow(TUI_Context ctx, int x, int y, int w, int h)
 }
 
 void
-TUI_Separator(TUI_Context ctx, int x, int y, int w)
+TUI_Separator(TUI_Context ctx)
 {
+    // Span the full interior width of the current clip region
+    int     w   = ctx->ClipRect.W;
+    TUI_Pos pos = TUI_LayoutGetCursor(ctx, w);
+
     for (int i = 0; i < w; i++)
     {
-        Put(ctx, x + i, y, BOX_S_H);
+        Put(ctx, pos.X + i, pos.Y, BOX_S_H);
     }
+
+    TUI_LayoutAdvance(ctx, w, 1);
 }

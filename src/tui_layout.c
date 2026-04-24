@@ -74,6 +74,29 @@ TUI_FocusRegister(TUI_Context ctx, uint32_t id)
 // │ Layout Cursor Advancement                                          │
 // ╰────────────────────────────────────────────────────────────────────╯
 
+TUI_Pos
+TUI_LayoutGetCursor(TUI_Context ctx, int widgetW)
+{
+    TUI_Pos pos;
+
+    if (ctx->AlignCenter)
+    {
+        // Center within the clip rect (window interior width)
+        int availW = ctx->ClipRect.W;
+        int x = (availW - widgetW) / 2;
+        if (x < 0) x = 0;
+        pos.X = x;
+        ctx->AlignCenter = false;
+    }
+    else
+    {
+        pos.X = ctx->Cursor.X + ctx->Indent;
+    }
+
+    pos.Y = ctx->Cursor.Y;
+    return pos;
+}
+
 void
 TUI_LayoutAdvance(TUI_Context ctx, int w, int h)
 {
@@ -120,7 +143,7 @@ TUI_LayoutRowEnd(TUI_Context ctx)
     
     // Advance Y past the tallest widget in the row
     ctx->Cursor.Y += ctx->RowMaxHeight + ctx->Margin;
-    ctx->Cursor.X  = 0; // Reset X to left edge of current scope
+    ctx->Cursor.X  = 0; // Reset X to left edge (indent re-applied by GetCursor)
     
     ctx->RowMaxHeight = 0;
 }
@@ -136,6 +159,18 @@ TUI_LayoutSpace(TUI_Context ctx, int size)
     {
         ctx->Cursor.X += size;
     }
+}
+
+void
+TUI_LayoutIndent(TUI_Context ctx, int indent)
+{
+    ctx->Indent = indent;
+}
+
+void
+TUI_LayoutAlignCenter(TUI_Context ctx)
+{
+    ctx->AlignCenter = true;
 }
 
 // ╭────────────────────────────────────────────────────────────────────╮
@@ -219,6 +254,8 @@ TUI_WindowBegin(TUI_Context ctx, int x, int y, int w, int h, const char* title)
     ctx->LastWidgetHeight = 0;
     ctx->RowMaxHeight     = 0;
     ctx->LayoutDir        = TUI_DIRECTION_VERTICAL;
+    ctx->Indent           = 0;
+    ctx->AlignCenter      = false;
 }
 
 void

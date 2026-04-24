@@ -68,24 +68,26 @@ main(void)
             TUI_WindowBegin(ctx, winX, winY, winW, winH, "Setup - MyApp v1.0");
 
             TUI_LayoutSetCursor(ctx, 1, 1);
-            TUI_Label(ctx, 1, 1, "Welcome to the MyApp Setup Wizard.");
-            TUI_Label(ctx, 1, 3, "This wizard will guide you through");
-            TUI_Label(ctx, 1, 4, "the installation of MyApp on your");
-            TUI_Label(ctx, 1, 5, "computer.");
-            TUI_Label(ctx, 1, 7, "It is recommended that you close");
-            TUI_Label(ctx, 1, 8, "all other applications before");
-            TUI_Label(ctx, 1, 9, "continuing.");
+            TUI_Label(ctx, "Welcome to the MyApp Setup Wizard.");
+            TUI_LayoutSpace(ctx, 1);
+            TUI_Label(ctx, "This wizard will guide you through");
+            TUI_Label(ctx, "the installation of MyApp on your");
+            TUI_Label(ctx, "computer.");
+            TUI_LayoutSpace(ctx, 1);
+            TUI_Label(ctx, "It is recommended that you close");
+            TUI_Label(ctx, "all other applications before");
+            TUI_Label(ctx, "continuing.");
 
             TUI_LayoutSetCursor(ctx, 1, 13);
             TUI_LayoutRowBegin(ctx);
-
-            if (TUI_Button(ctx, TUI_Id("next_welcome"), 30, 13, 14, "Next >"))
+            TUI_LayoutSpace(ctx, 28);
+            if (TUI_Button(ctx, TUI_Id("next_welcome"), 14, "Next >"))
                 page = PAGE_LICENSE;
-
-            if (TUI_Button(ctx, TUI_Id("cancel_welcome"), 45, 13, 12, "Cancel"))
+            TUI_LayoutSpace(ctx, 1);
+            if (TUI_Button(ctx, TUI_Id("cancel_welcome"), 12, "Cancel"))
                 showQuitDialog = true;
-
             TUI_LayoutRowEnd(ctx);
+
             TUI_WindowEnd(ctx);
             break;
         }
@@ -95,28 +97,32 @@ main(void)
         {
             TUI_WindowBegin(ctx, winX, winY, winW, winH, "License Agreement");
 
-            TUI_Label(ctx, 1, 1, "Please review the license terms");
-            TUI_Label(ctx, 1, 2, "before installing MyApp.");
-            TUI_Separator(ctx, 1, 3, winW - 4);
-            TUI_Label(ctx, 1, 5, "MIT License");
-            TUI_Label(ctx, 1, 6, "Copyright (c) 2026");
-            TUI_Label(ctx, 1, 7, "Permission is hereby granted,");
-            TUI_Label(ctx, 1, 8, "free of charge, to any person...");
+            TUI_LayoutSetCursor(ctx, 1, 1);
+            TUI_Label(ctx, "Please review the license terms");
+            TUI_Label(ctx, "before installing MyApp.");
+            TUI_Separator(ctx);
+            TUI_LayoutSpace(ctx, 1);
+            TUI_Label(ctx, "MIT License");
+            TUI_Label(ctx, "Copyright (c) 2026");
+            TUI_Label(ctx, "Permission is hereby granted,");
+            TUI_Label(ctx, "free of charge, to any person...");
 
-            TUI_Checkbox(ctx, TUI_Id("accept"), 1, 11,
+            TUI_LayoutSetCursor(ctx, 1, 11);
+            TUI_Checkbox(ctx, TUI_Id("accept"),
                          "I accept the license agreement", &acceptLicense);
 
+            TUI_LayoutSetCursor(ctx, 1, 13);
             TUI_LayoutRowBegin(ctx);
-            if (TUI_Button(ctx, TUI_Id("back_license"), 1, 13, 12, "< Back"))
+            if (TUI_Button(ctx, TUI_Id("back_license"), 12, "< Back"))
                 page = PAGE_WELCOME;
-
-            if (TUI_Button(ctx, TUI_Id("next_license"), 30, 13, 14, "Next >"))
+            TUI_LayoutSpace(ctx, 17);
+            if (TUI_Button(ctx, TUI_Id("next_license"), 14, "Next >"))
             {
                 if (acceptLicense)
                     page = PAGE_OPTIONS;
             }
-
-            if (TUI_Button(ctx, TUI_Id("cancel_license"), 45, 13, 12, "Cancel"))
+            TUI_LayoutSpace(ctx, 1);
+            if (TUI_Button(ctx, TUI_Id("cancel_license"), 12, "Cancel"))
                 showQuitDialog = true;
             TUI_LayoutRowEnd(ctx);
 
@@ -129,30 +135,34 @@ main(void)
         {
             TUI_WindowBegin(ctx, winX, winY, winW, winH, "Installation Options");
 
-            TUI_Label(ctx, 1, 1, "Choose installation type:");
+            TUI_LayoutSetCursor(ctx, 1, 1);
+            TUI_Label(ctx, "Choose installation type:");
 
-            TUI_RadioButton(ctx, TUI_Id("typical"), 3, 3,
+            TUI_LayoutSetCursor(ctx, 3, 3);
+            TUI_RadioButton(ctx, TUI_Id("typical"),
                             "Typical  - Recommended features", &installType, 0);
-            TUI_RadioButton(ctx, TUI_Id("custom"), 3, 4,
+            TUI_RadioButton(ctx, TUI_Id("custom"),
                             "Custom   - Choose components", &installType, 1);
-            TUI_RadioButton(ctx, TUI_Id("minimal"), 3, 5,
+            TUI_RadioButton(ctx, TUI_Id("minimal"),
                             "Minimal  - Core files only", &installType, 2);
 
-            TUI_Label(ctx, 1, 7, "Install path:");
-            TUI_TextInput(ctx, TUI_Id("path"), 1, 8, winW - 4,
+            TUI_LayoutSetCursor(ctx, 1, 7);
+            TUI_Label(ctx, "Install path:");
+            TUI_TextInput(ctx, TUI_Id("path"), winW - 4,
                           installPath, (int)sizeof(installPath));
 
+            TUI_LayoutSetCursor(ctx, 1, 13);
             TUI_LayoutRowBegin(ctx);
-            if (TUI_Button(ctx, TUI_Id("back_options"), 1, 13, 12, "< Back"))
+            if (TUI_Button(ctx, TUI_Id("back_options"), 12, "< Back"))
                 page = PAGE_LICENSE;
-
-            if (TUI_Button(ctx, TUI_Id("install"), 28, 13, 16, "Install >"))
+            TUI_LayoutSpace(ctx, 15);
+            if (TUI_Button(ctx, TUI_Id("install"), 16, "Install >"))
             {
                 page     = PAGE_INSTALL;
                 progress = 0.0f;
             }
-
-            if (TUI_Button(ctx, TUI_Id("cancel_options"), 45, 13, 12, "Cancel"))
+            TUI_LayoutSpace(ctx, 1);
+            if (TUI_Button(ctx, TUI_Id("cancel_options"), 12, "Cancel"))
                 showQuitDialog = true;
             TUI_LayoutRowEnd(ctx);
 
@@ -165,19 +175,22 @@ main(void)
         {
             TUI_WindowBegin(ctx, winX, winY, winW, winH, "Installing...");
 
-            TUI_Label(ctx, 1, 1, "Installing MyApp, please wait...");
-            TUI_Label(ctx, 1, 3, "Extracting files:");
-            TUI_ProgressBar(ctx, 1, 5, winW - 4, progress);
+            TUI_LayoutSetCursor(ctx, 1, 1);
+            TUI_Label(ctx, "Installing MyApp, please wait...");
+            TUI_LayoutSpace(ctx, 1);
+            TUI_Label(ctx, "Extracting files:");
+            TUI_LayoutSpace(ctx, 1);
+            TUI_ProgressBar(ctx, winW - 4, progress);
 
-            // Show current "file" being installed
+            TUI_LayoutSetCursor(ctx, 1, 7);
             if (progress < 0.25f)
-                TUI_Label(ctx, 1, 7, "  myapp.exe");
+                TUI_Label(ctx, "  myapp.exe");
             else if (progress < 0.50f)
-                TUI_Label(ctx, 1, 7, "  libcore.dll");
+                TUI_Label(ctx, "  libcore.dll");
             else if (progress < 0.75f)
-                TUI_Label(ctx, 1, 7, "  data/config.ini");
+                TUI_Label(ctx, "  data/config.ini");
             else
-                TUI_Label(ctx, 1, 7, "  README.txt");
+                TUI_Label(ctx, "  README.txt");
 
             // Simulate progress
             if (progress < 1.0f)
@@ -194,14 +207,20 @@ main(void)
         {
             TUI_WindowBegin(ctx, winX, winY, winW, winH, "Installation Complete");
 
-            TUI_Label(ctx, 1, 1, "MyApp has been successfully");
-            TUI_Label(ctx, 1, 2, "installed on your computer.");
-            TUI_Label(ctx, 1, 4, "Install path:");
-            TUI_Label(ctx, 3, 5, installPath);
+            TUI_LayoutSetCursor(ctx, 1, 1);
+            TUI_Label(ctx, "MyApp has been successfully");
+            TUI_Label(ctx, "installed on your computer.");
+            TUI_LayoutSpace(ctx, 1);
+            TUI_Label(ctx, "Install path:");
+            TUI_LayoutSetCursor(ctx, 3, 5);
+            TUI_Label(ctx, installPath);
 
-            TUI_Label(ctx, 1, 7, "Thank you for choosing MyApp!");
+            TUI_LayoutSetCursor(ctx, 1, 7);
+            TUI_Label(ctx, "Thank you for choosing MyApp!");
 
-            if (TUI_Button(ctx, TUI_Id("finish"), 22, 13, 14, "Finish"))
+            TUI_LayoutSetCursor(ctx, 1, 13);
+            TUI_LayoutAlignCenter(ctx);
+            if (TUI_Button(ctx, TUI_Id("finish"), 14, "Finish"))
                 running = false;
 
             TUI_WindowEnd(ctx);

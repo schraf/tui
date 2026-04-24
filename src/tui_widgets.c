@@ -14,10 +14,12 @@
 // ╰────────────────────────────────────────────────────────────────────╯
 
 void
-TUI_Label(TUI_Context ctx, int x, int y, const char* text)
+TUI_Label(TUI_Context ctx, const char* text)
 {
-    TUI_DrawText(ctx, x, y, text);
-    TUI_LayoutAdvance(ctx, (int)strlen(text), 1);
+    int     w   = (int)strlen(text);
+    TUI_Pos pos = TUI_LayoutGetCursor(ctx, w);
+    TUI_DrawText(ctx, pos.X, pos.Y, text);
+    TUI_LayoutAdvance(ctx, w, 1);
 }
 
 // ╭────────────────────────────────────────────────────────────────────╮
@@ -25,17 +27,20 @@ TUI_Label(TUI_Context ctx, int x, int y, const char* text)
 // ╰────────────────────────────────────────────────────────────────────╯
 
 bool
-TUI_Button(TUI_Context ctx, uint32_t id, int x, int y, int w, const char* label)
+TUI_Button(TUI_Context ctx, uint32_t id, int w, const char* label)
 {
-    bool focused = TUI_FocusRegister(ctx, id);
-
-    int labelLen = (int)strlen(label);
+    bool focused  = TUI_FocusRegister(ctx, id);
+    int  labelLen = (int)strlen(label);
 
     // Clamp button width: at minimum "[ X ]" = label + 4
     if (w < labelLen + 4)
     {
         w = labelLen + 4;
     }
+
+    TUI_Pos pos = TUI_LayoutGetCursor(ctx, w);
+    int x = pos.X;
+    int y = pos.Y;
 
     // Save current attr, set highlight if focused
     TUI_Attr saved = ctx->CurrentAttr;
@@ -85,7 +90,7 @@ TUI_Button(TUI_Context ctx, uint32_t id, int x, int y, int w, const char* label)
 // ╰────────────────────────────────────────────────────────────────────╯
 
 bool
-TUI_Checkbox(TUI_Context ctx, uint32_t id, int x, int y, const char* label, bool* value)
+TUI_Checkbox(TUI_Context ctx, uint32_t id, const char* label, bool* value)
 {
     bool focused = TUI_FocusRegister(ctx, id);
     bool changed = false;
@@ -96,6 +101,11 @@ TUI_Checkbox(TUI_Context ctx, uint32_t id, int x, int y, const char* label, bool
         *value  = !(*value);
         changed = true;
     }
+
+    int     w   = 4 + (int)strlen(label);
+    TUI_Pos pos = TUI_LayoutGetCursor(ctx, w);
+    int x = pos.X;
+    int y = pos.Y;
 
     // Save current attr, highlight if focused
     TUI_Attr saved = ctx->CurrentAttr;
@@ -116,7 +126,7 @@ TUI_Checkbox(TUI_Context ctx, uint32_t id, int x, int y, const char* label, bool
     TUI_DrawText(ctx, x + 4, y, label);
 
     ctx->CurrentAttr = saved;
-    TUI_LayoutAdvance(ctx, 4 + (int)strlen(label), 1);
+    TUI_LayoutAdvance(ctx, w, 1);
 
     return changed;
 }
@@ -126,7 +136,7 @@ TUI_Checkbox(TUI_Context ctx, uint32_t id, int x, int y, const char* label, bool
 // ╰────────────────────────────────────────────────────────────────────╯
 
 bool
-TUI_RadioButton(TUI_Context ctx, uint32_t id, int x, int y,
+TUI_RadioButton(TUI_Context ctx, uint32_t id,
                 const char* label, int* selected, int value)
 {
     bool focused = TUI_FocusRegister(ctx, id);
@@ -142,7 +152,11 @@ TUI_RadioButton(TUI_Context ctx, uint32_t id, int x, int y,
         }
     }
 
-    bool isSelected = (*selected == value);
+    bool    isSelected = (*selected == value);
+    int     w          = 4 + (int)strlen(label);
+    TUI_Pos pos        = TUI_LayoutGetCursor(ctx, w);
+    int x = pos.X;
+    int y = pos.Y;
 
     // Save current attr, highlight if focused
     TUI_Attr saved = ctx->CurrentAttr;
@@ -163,7 +177,7 @@ TUI_RadioButton(TUI_Context ctx, uint32_t id, int x, int y,
     TUI_DrawText(ctx, x + 4, y, label);
 
     ctx->CurrentAttr = saved;
-    TUI_LayoutAdvance(ctx, 4 + (int)strlen(label), 1);
+    TUI_LayoutAdvance(ctx, w, 1);
 
     return changed;
 }
@@ -173,7 +187,7 @@ TUI_RadioButton(TUI_Context ctx, uint32_t id, int x, int y,
 // ╰────────────────────────────────────────────────────────────────────╯
 
 void
-TUI_ProgressBar(TUI_Context ctx, int x, int y, int w, float fraction)
+TUI_ProgressBar(TUI_Context ctx, int w, float fraction)
 {
     if (fraction < 0.0f) 
     {
@@ -184,6 +198,10 @@ TUI_ProgressBar(TUI_Context ctx, int x, int y, int w, float fraction)
     {
         fraction = 1.0f;
     }
+
+    TUI_Pos pos = TUI_LayoutGetCursor(ctx, w);
+    int x = pos.X;
+    int y = pos.Y;
 
     // Outer brackets
     TUI_DrawChar(ctx, x, y, "[");
@@ -206,7 +224,7 @@ TUI_ProgressBar(TUI_Context ctx, int x, int y, int w, float fraction)
 // ╰────────────────────────────────────────────────────────────────────╯
 
 bool
-TUI_TextInput(TUI_Context ctx, uint32_t id, int x, int y, int w,
+TUI_TextInput(TUI_Context ctx, uint32_t id, int w,
               char* buffer, int bufferSize)
 {
     bool focused = TUI_FocusRegister(ctx, id);
@@ -240,6 +258,10 @@ TUI_TextInput(TUI_Context ctx, uint32_t id, int x, int y, int w,
 
     // Recalculate length after possible edit
     len = (int)strlen(buffer);
+
+    TUI_Pos pos = TUI_LayoutGetCursor(ctx, w);
+    int x = pos.X;
+    int y = pos.Y;
 
     // Save current attr
     TUI_Attr saved = ctx->CurrentAttr;
@@ -306,7 +328,7 @@ TUI_TextInput(TUI_Context ctx, uint32_t id, int x, int y, int w,
 // ╰────────────────────────────────────────────────────────────────────╯
 
 bool
-TUI_ListBox(TUI_Context ctx, uint32_t id, int x, int y, int w, int h,
+TUI_ListBox(TUI_Context ctx, uint32_t id, int w, int h,
             const char** items, int itemCount,
             int* selected, int* scrollOffset)
 {
@@ -383,6 +405,10 @@ TUI_ListBox(TUI_Context ctx, uint32_t id, int x, int y, int w, int h,
     {
         *scrollOffset = 0;
     }
+
+    TUI_Pos pos = TUI_LayoutGetCursor(ctx, w);
+    int x = pos.X;
+    int y = pos.Y;
 
     // Draw border
     TUI_Attr saved = ctx->CurrentAttr;
@@ -616,17 +642,30 @@ TUI_MessageBox(TUI_Context ctx, const char* title, const char* message,
     ctx->Origin.X = 0;
     ctx->Origin.Y = 0;
 
+    // Switch to horizontal layout for button row; position cursor at the
+    // first button's location (relative to the zeroed origin).
+    ctx->LayoutDir    = TUI_DIRECTION_HORIZONTAL;
+    ctx->RowMaxHeight = 0;
+    ctx->Cursor.X     = btnX;
+    ctx->Cursor.Y     = btnY;
+    ctx->Indent       = 0;
+    ctx->AlignCenter  = false;
+
     for (int i = 0; i < buttonCount; i++)
     {
         int btnW     = (int)strlen(buttons[i]) + 4;
         uint32_t btnId = TUI_Id(buttons[i]) ^ (uint32_t)(i + 1);
 
-        if (TUI_Button(ctx, btnId, btnX, btnY, btnW, buttons[i]))
+        if (TUI_Button(ctx, btnId, btnW, buttons[i]))
         {
             result = i;
         }
 
-        btnX += btnW + 2;
+        // Add spacing between buttons (except after the last one)
+        if (i < buttonCount - 1)
+        {
+            TUI_LayoutSpace(ctx, 2);
+        }
     }
 
     ctx->CurrentAttr = saved;

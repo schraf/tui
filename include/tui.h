@@ -140,28 +140,28 @@ uint32_t TUI_GetFocus(TUI_Context ctx);
 // ╰────────────────────────────────────────────────────────────────────╯
 
 // Returns true if activated (Enter pressed while focused)
-bool TUI_Button(TUI_Context ctx, uint32_t id, int x, int y, int w, const char* label);
+bool TUI_Button(TUI_Context ctx, uint32_t id, int w, const char* label);
 
 // Static text display
-void TUI_Label(TUI_Context ctx, int x, int y, const char* text);
+void TUI_Label(TUI_Context ctx, const char* text);
 
 // Returns true if value changed
-bool TUI_Checkbox(TUI_Context ctx, uint32_t id, int x, int y, const char* label, bool* value);
+bool TUI_Checkbox(TUI_Context ctx, uint32_t id, const char* label, bool* value);
 
 // Radio button. Returns true if selection changed.
 // `selected` points to the group's selected value; `value` is this button's value.
-bool TUI_RadioButton(TUI_Context ctx, uint32_t id, int x, int y,
+bool TUI_RadioButton(TUI_Context ctx, uint32_t id,
                      const char* label, int* selected, int value);
 
 // A simple progress bar (0.0f to 1.0f)
-void TUI_ProgressBar(TUI_Context ctx, int x, int y, int w, float fraction);
+void TUI_ProgressBar(TUI_Context ctx, int w, float fraction);
 
 // Single-line text input field. Returns true if the text changed.
-bool TUI_TextInput(TUI_Context ctx, uint32_t id, int x, int y, int w,
+bool TUI_TextInput(TUI_Context ctx, uint32_t id, int w,
                    char* buffer, int bufferSize);
 
 // Scrollable list box. Returns true if selection changed.
-bool TUI_ListBox(TUI_Context ctx, uint32_t id, int x, int y, int w, int h,
+bool TUI_ListBox(TUI_Context ctx, uint32_t id, int w, int h,
                  const char** items, int itemCount,
                  int* selected, int* scrollOffset);
 
@@ -176,8 +176,8 @@ void TUI_StatusBar(TUI_Context ctx, const char* text);
 int TUI_MessageBox(TUI_Context ctx, const char* title, const char* message,
                    const char** buttons, int buttonCount);
 
-// Horizontal separator / divider line.
-void TUI_Separator(TUI_Context ctx, int x, int y, int w);
+// Horizontal separator spanning the full interior width of the current window.
+void TUI_Separator(TUI_Context ctx);
 
 // ╭────────────────────────────────────────────────────────────────────╮
 // │ Windows                                                            │
@@ -207,7 +207,15 @@ void TUI_LayoutRowBegin(TUI_Context ctx);
 // Switch back to vertical placement (the default)
 void TUI_LayoutRowEnd(TUI_Context ctx);
 
-// Manually add space between widgets
+// Manually add space between widgets (cells along the current axis)
 void TUI_LayoutSpace(TUI_Context ctx, int size);
+
+// Set a persistent indent level (added to Cursor.X at the start of each line).
+// Pass 0 to reset.
+void TUI_LayoutIndent(TUI_Context ctx, int indent);
+
+// Center the next widget horizontally within the current window.
+// This is a one-shot flag: it applies only to the immediately following widget.
+void TUI_LayoutAlignCenter(TUI_Context ctx);
 
 #endif

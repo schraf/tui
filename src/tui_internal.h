@@ -97,6 +97,8 @@ struct TUI_Context
     int           RowMaxHeight;    // Tallest widget in current horizontal row
     int           Margin;          // Default padding between widgets
     TUI_Direction LayoutDir;
+    int           Indent;          // Persistent X indent applied at each new line
+    bool          AlignCenter;     // One-shot: center the next widget horizontally
 };
 
 // ╭────────────────────────────────────────────────────────────────────╮
@@ -144,6 +146,11 @@ void TUI_OutFlush(TUI_Context ctx);
 
 // Advance layout cursor after placing a widget of given size
 void TUI_LayoutAdvance(TUI_Context ctx, int w, int h);
+
+// Returns the (x, y) position at which the next widget should draw.
+// Applies the current Indent and consumes the one-shot AlignCenter flag.
+// Must be called once per widget, before drawing, passing the widget's width.
+TUI_Pos TUI_LayoutGetCursor(TUI_Context ctx, int widgetW);
 
 // Register a widget ID for focus chain tracking.
 // Call this from every interactive widget. Returns true if this widget has focus.
