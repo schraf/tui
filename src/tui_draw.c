@@ -13,30 +13,39 @@
 // │ Box-Drawing Characters                                             │
 // ╰────────────────────────────────────────────────────────────────────╯
 
-// ASCII box-drawing characters for maximum compatibility.
+// --- Single-line Box Characters ---
+#define BOX_S_TL "\u250C" // ┌
+#define BOX_S_TR "\u2510" // ┐
+#define BOX_S_BL "\u2514" // └
+#define BOX_S_BR "\u2518" // ┘
+#define BOX_S_H  "\u2500" // ─
+#define BOX_S_V  "\u2502" // │
+#define BOX_S_TM "\u252C" // ┬ (Top Middle/Junction)
+#define BOX_S_BM "\u2534" // ┴ (Bottom Middle/Junction)
 
-// Single-line box chars
-#define BOX_S_TL '+'
-#define BOX_S_TR '+'
-#define BOX_S_BL '+'
-#define BOX_S_BR '+'
-#define BOX_S_H  '-'
-#define BOX_S_V  '|'
+// --- Double-line Box Characters ---
+#define BOX_D_TL "\u2554" // ╔
+#define BOX_D_TR "\u2557" // ╗
+#define BOX_D_BL "\u255A" // ╚
+#define BOX_D_BR "\u255D" // ╝
+#define BOX_D_H  "\u2550" // ═
+#define BOX_D_V  "\u2551" // ║
+#define BOX_D_TM "\u2566" // ╦
+#define BOX_D_BM "\u2569" // ╩
 
-// Double-line box chars (ASCII approximation)
-#define BOX_D_TL '*'
-#define BOX_D_TR '*'
-#define BOX_D_BL '*'
-#define BOX_D_BR '*'
-#define BOX_D_H  '='
-#define BOX_D_V  '|'
+// --- The "Shadow" Characters (Essential for that DOS pop) ---
+// These are dithered blocks used to create drop shadows on windows.
+#define BOX_SHADE_LIGHT "\u2591" // ░
+#define BOX_SHADE_MED   "\u2592" // ▒
+#define BOX_SHADE_DARK  "\u2593" // ▓
+#define BOX_FULL_BLOCK  "\u2588" // █
 
 // ╭────────────────────────────────────────────────────────────────────╮
 // │ Helper: Put a character at an origin-relative position             │
 // ╰────────────────────────────────────────────────────────────────────╯
 
 static void
-Put(TUI_Context ctx, int x, int y, char ch)
+Put(TUI_Context ctx, int x, int y, const char* ch)
 {
     TUI_RenderPut(ctx, ctx->Origin.X + x, ctx->Origin.Y + y, ch, ctx->CurrentAttr);
 }
@@ -46,7 +55,7 @@ Put(TUI_Context ctx, int x, int y, char ch)
 // ╰────────────────────────────────────────────────────────────────────╯
 
 void
-TUI_DrawChar(TUI_Context ctx, int x, int y, char c)
+TUI_DrawChar(TUI_Context ctx, int x, int y, const char* c)
 {
     Put(ctx, x, y, c);
 }
@@ -54,9 +63,11 @@ TUI_DrawChar(TUI_Context ctx, int x, int y, char c)
 void
 TUI_DrawText(TUI_Context ctx, int x, int y, const char* text)
 {
+    // Need to handle UTF-8 properly if text contains it, but for simple ASCII text:
     for (int i = 0; text[i] != '\0'; i++)
     {
-        Put(ctx, x + i, y, text[i]);
+        char temp[2] = { text[i], '\0' };
+        Put(ctx, x + i, y, temp);
     }
 }
 
@@ -66,7 +77,7 @@ TUI_DrawBox(TUI_Context ctx, int x, int y, int w, int h, bool doubleLine)
     if (w < 2 || h < 2)
         return;
 
-    char tl, tr, bl, br, hz, vt;
+    const char *tl, *tr, *bl, *br, *hz, *vt;
 
     if (doubleLine)
     {
@@ -103,7 +114,7 @@ TUI_DrawBox(TUI_Context ctx, int x, int y, int w, int h, bool doubleLine)
 }
 
 void
-TUI_FillRect(TUI_Context ctx, int x, int y, int w, int h, char c)
+TUI_FillRect(TUI_Context ctx, int x, int y, int w, int h, const char* c)
 {
     for (int row = 0; row < h; row++)
     {
@@ -115,7 +126,7 @@ TUI_FillRect(TUI_Context ctx, int x, int y, int w, int h, char c)
 }
 
 void
-TUI_DrawHLine(TUI_Context ctx, int x, int y, int len, char c)
+TUI_DrawHLine(TUI_Context ctx, int x, int y, int len, const char* c)
 {
     for (int i = 0; i < len; i++)
     {
@@ -124,7 +135,7 @@ TUI_DrawHLine(TUI_Context ctx, int x, int y, int len, char c)
 }
 
 void
-TUI_DrawVLine(TUI_Context ctx, int x, int y, int len, char c)
+TUI_DrawVLine(TUI_Context ctx, int x, int y, int len, const char* c)
 {
     for (int i = 0; i < len; i++)
     {
@@ -142,14 +153,14 @@ TUI_DrawShadow(TUI_Context ctx, int x, int y, int w, int h)
     // Right edge shadow (2 cells wide, offset by 1 down)
     for (int i = 1; i < h; i++)
     {
-        Put(ctx, x + w, y + i, ' ');
-        Put(ctx, x + w + 1, y + i, ' ');
+        Put(ctx, x + w, y + i, BOX_SHADE_DARK);
+        Put(ctx, x + w + 1, y + i, BOX_SHADE_DARK);
     }
 
     // Bottom edge shadow (offset by 2 right to account for right shadow columns)
     for (int i = 2; i < w + 2; i++)
     {
-        Put(ctx, x + i, y + h, ' ');
+        Put(ctx, x + i, y + h, BOX_SHADE_DARK);
     }
 
     ctx->CurrentAttr = saved;
@@ -160,6 +171,6 @@ TUI_Separator(TUI_Context ctx, int x, int y, int w)
 {
     for (int i = 0; i < w; i++)
     {
-        Put(ctx, x + i, y, '-');
+        Put(ctx, x + i, y, BOX_S_H);
     }
 }

@@ -10,23 +10,6 @@
 #include <string.h>
 
 // ╭────────────────────────────────────────────────────────────────────╮
-// │ Helper: Resolve widget position                                    │
-// ╰────────────────────────────────────────────────────────────────────╯
-
-// If x/y are -1, use layout cursor. Otherwise use explicit coords.
-// Returns absolute screen position.
-static TUI_Pos
-ResolvePos(TUI_Context ctx, int x, int y)
-{
-    TUI_Pos p;
-
-    p.X = ctx->Origin.X + ((x >= 0) ? x : ctx->Cursor.X);
-    p.Y = ctx->Origin.Y + ((y >= 0) ? y : ctx->Cursor.Y);
-    
-    return p;
-}
-
-// ╭────────────────────────────────────────────────────────────────────╮
 // │ TUI_Label                                                          │
 // ╰────────────────────────────────────────────────────────────────────╯
 
@@ -67,8 +50,8 @@ TUI_Button(TUI_Context ctx, uint32_t id, int x, int y, int w, const char* label)
     }
 
     // Draw button: "[ label ]" padded to width w
-    TUI_DrawChar(ctx, x, y, '[');
-    TUI_DrawChar(ctx, x + 1, y, ' ');
+    TUI_DrawChar(ctx, x, y, "[");
+    TUI_DrawChar(ctx, x + 1, y, " ");
 
     // Center label within the button
     int innerW  = w - 4; // Space between "[ " and " ]"
@@ -78,16 +61,17 @@ TUI_Button(TUI_Context ctx, uint32_t id, int x, int y, int w, const char* label)
     {
         if (i >= padLeft && i < padLeft + labelLen)
         {
-            TUI_DrawChar(ctx, x + 2 + i, y, label[i - padLeft]);
+            char temp[2] = { label[i - padLeft], '\0' };
+            TUI_DrawChar(ctx, x + 2 + i, y, temp);
         }
         else
         {
-            TUI_DrawChar(ctx, x + 2 + i, y, ' ');
+            TUI_DrawChar(ctx, x + 2 + i, y, " ");
         }
     }
 
-    TUI_DrawChar(ctx, x + w - 2, y, ' ');
-    TUI_DrawChar(ctx, x + w - 1, y, ']');
+    TUI_DrawChar(ctx, x + w - 2, y, " ");
+    TUI_DrawChar(ctx, x + w - 1, y, "]");
 
     ctx->CurrentAttr = saved;
     TUI_LayoutAdvance(ctx, w, 1);
@@ -125,10 +109,10 @@ TUI_Checkbox(TUI_Context ctx, uint32_t id, int x, int y, const char* label, bool
     }
 
     // Draw: "[X] label" or "[ ] label"
-    TUI_DrawChar(ctx, x, y, '[');
-    TUI_DrawChar(ctx, x + 1, y, *value ? 'X' : ' ');
-    TUI_DrawChar(ctx, x + 2, y, ']');
-    TUI_DrawChar(ctx, x + 3, y, ' ');
+    TUI_DrawChar(ctx, x, y, "[");
+    TUI_DrawChar(ctx, x + 1, y, *value ? "X" : " ");
+    TUI_DrawChar(ctx, x + 2, y, "]");
+    TUI_DrawChar(ctx, x + 3, y, " ");
     TUI_DrawText(ctx, x + 4, y, label);
 
     ctx->CurrentAttr = saved;
@@ -172,10 +156,10 @@ TUI_RadioButton(TUI_Context ctx, uint32_t id, int x, int y,
     }
 
     // Draw: "(o) label" or "( ) label"
-    TUI_DrawChar(ctx, x, y, '(');
-    TUI_DrawChar(ctx, x + 1, y, isSelected ? 'o' : ' ');
-    TUI_DrawChar(ctx, x + 2, y, ')');
-    TUI_DrawChar(ctx, x + 3, y, ' ');
+    TUI_DrawChar(ctx, x, y, "(");
+    TUI_DrawChar(ctx, x + 1, y, isSelected ? "o" : " ");
+    TUI_DrawChar(ctx, x + 2, y, ")");
+    TUI_DrawChar(ctx, x + 3, y, " ");
     TUI_DrawText(ctx, x + 4, y, label);
 
     ctx->CurrentAttr = saved;
@@ -202,8 +186,8 @@ TUI_ProgressBar(TUI_Context ctx, int x, int y, int w, float fraction)
     }
 
     // Outer brackets
-    TUI_DrawChar(ctx, x, y, '[');
-    TUI_DrawChar(ctx, x + w - 1, y, ']');
+    TUI_DrawChar(ctx, x, y, "[");
+    TUI_DrawChar(ctx, x + w - 1, y, "]");
 
     // Inner fill area
     int innerW = w - 2;
@@ -211,7 +195,7 @@ TUI_ProgressBar(TUI_Context ctx, int x, int y, int w, float fraction)
 
     for (int i = 0; i < innerW; i++)
     {
-        TUI_DrawChar(ctx, x + 1 + i, y, (i < filled) ? '#' : '.');
+        TUI_DrawChar(ctx, x + 1 + i, y, (i < filled) ? "\u2588" : "\u2591");
     }
 
     TUI_LayoutAdvance(ctx, w, 1);
@@ -284,9 +268,15 @@ TUI_TextInput(TUI_Context ctx, uint32_t id, int x, int y, int w,
     for (int i = 0; i < w; i++)
     {
         int bufIdx = visibleStart + i;
-        char ch = (bufIdx < len) ? buffer[bufIdx] : ' ';
-
-        TUI_DrawChar(ctx, x + i, y, ch);
+        if (bufIdx < len)
+        {
+            char temp[2] = { buffer[bufIdx], '\0' };
+            TUI_DrawChar(ctx, x + i, y, temp);
+        }
+        else
+        {
+            TUI_DrawChar(ctx, x + i, y, " ");
+        }
     }
 
     // Draw cursor indicator at end of text (if focused and within bounds)
@@ -301,8 +291,7 @@ TUI_TextInput(TUI_Context ctx, uint32_t id, int x, int y, int w,
 
             int absX = ctx->Origin.X + x + cursorPos;
             int absY = ctx->Origin.Y + y;
-
-            TUI_RenderPut(ctx, absX, absY, ' ', cursorAttr);
+            TUI_RenderPut(ctx, absX, absY, " ", cursorAttr);
         }
     }
 
@@ -431,9 +420,15 @@ TUI_ListBox(TUI_Context ctx, uint32_t id, int x, int y, int w, int h,
 
         for (int col = 0; col < innerW; col++)
         {
-            char ch = (col < itemLen) ? item[col] : ' ';
-
-            TUI_DrawChar(ctx, x + 1 + col, y + 1 + row, ch);
+            if (col < itemLen)
+            {
+                char temp[2] = { item[col], '\0' };
+                TUI_DrawChar(ctx, x + 1 + col, y + 1 + row, temp);
+            }
+            else
+            {
+                TUI_DrawChar(ctx, x + 1 + col, y + 1 + row, " ");
+            }
         }
     }
 
@@ -460,8 +455,7 @@ TUI_ListBox(TUI_Context ctx, uint32_t id, int x, int y, int w, int h,
         // Draw scrollbar track and thumb on the right border
         for (int row = 0; row < visibleRows; row++)
         {
-            char ch = (row == thumbPos) ? '#' : '|';
-
+            const char* ch = (row == thumbPos) ? "\u2588" : "\u2502";
             TUI_DrawChar(ctx, x + w - 1, y + 1 + row, ch);
         }
     }
@@ -487,7 +481,7 @@ TUI_MenuBar(TUI_Context ctx, const char** items, int itemCount, int* selected)
 
     // Menu bar background: fill the entire top row
     ctx->CurrentAttr = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_LIGHTGRAY);
-    TUI_FillRect(ctx, 0, 0, ctx->ScreenWidth, 1, ' ');
+    TUI_FillRect(ctx, 0, 0, ctx->ScreenWidth, 1, " ");
 
     // Handle keyboard: Left/Right to navigate
     if (ctx->LastKey == TUI_KEY_LEFT && *selected > 0)
@@ -516,9 +510,9 @@ TUI_MenuBar(TUI_Context ctx, const char** items, int itemCount, int* selected)
             ctx->CurrentAttr = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_LIGHTGRAY);
         }
 
-        TUI_DrawChar(ctx, xPos, 0, ' ');
+        TUI_DrawChar(ctx, xPos, 0, " ");
         TUI_DrawText(ctx, xPos + 1, 0, items[i]);
-        TUI_DrawChar(ctx, xPos + 1 + itemLen, 0, ' ');
+        TUI_DrawChar(ctx, xPos + 1 + itemLen, 0, " ");
 
         xPos += itemLen + 3; // " item " + 1 spacing
     }
@@ -544,10 +538,9 @@ TUI_StatusBar(TUI_Context ctx, const char* text)
     int row = ctx->ScreenHeight - 1;
 
     ctx->CurrentAttr = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_LIGHTGRAY);
+    TUI_FillRect(ctx, 0, row, ctx->ScreenWidth, 1, " ");
 
-    TUI_FillRect(ctx, 0, row, ctx->ScreenWidth, 1, ' ');
-
-    TUI_DrawChar(ctx, 0, row, ' ');
+    TUI_DrawChar(ctx, 0, row, " ");
     TUI_DrawText(ctx, 1, row, text);
 
     ctx->CurrentAttr = saved;
@@ -578,21 +571,9 @@ TUI_MessageBox(TUI_Context ctx, const char* title, const char* message,
     // Box width: max of message width, button width, title width + some padding
     int titleLen = title ? (int)strlen(title) : 0;
     int boxW     = msgLen + 4;
-    
-    if (totalBtnW + 4 > boxW) 
-    {
-        boxW = totalBtnW + 4;
-    }
-
-    if (titleLen + 6 > boxW)
-    {
-        boxW = titleLen + 6;
-    }
-
-    if (boxW < 20) 
-    {
-        boxW = 20;
-    }
+    if (totalBtnW + 4 > boxW) boxW = totalBtnW + 4;
+    if (titleLen + 6 > boxW)  boxW = titleLen + 6;
+    if (boxW < 20) boxW = 20;
 
     int boxH = 7; // border(1) + padding(1) + message(1) + padding(1) + buttons(1) + padding(1) + border(1)
 
@@ -611,17 +592,16 @@ TUI_MessageBox(TUI_Context ctx, const char* title, const char* message,
 
     // Draw box with filled interior
     TUI_Attr saved = ctx->CurrentAttr;
-    TUI_FillRect(ctx, boxX, boxY, boxW, boxH, ' ');
+    TUI_FillRect(ctx, boxX, boxY, boxW, boxH, " ");
     TUI_DrawBox(ctx, boxX, boxY, boxW, boxH, true);
 
     // Draw title
     if (title && title[0])
     {
         int tx = boxX + (boxW - titleLen - 2) / 2;
-
-        TUI_DrawChar(ctx, tx, boxY, ' ');
+        TUI_DrawChar(ctx, tx, boxY, " ");
         TUI_DrawText(ctx, tx + 1, boxY, title);
-        TUI_DrawChar(ctx, tx + 1 + titleLen, boxY, ' ');
+        TUI_DrawChar(ctx, tx + 1 + titleLen, boxY, " ");
     }
 
     // Draw message centered

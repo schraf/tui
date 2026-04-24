@@ -30,13 +30,17 @@ TUI_FocusRegister(TUI_Context ctx, uint32_t id)
 {
     // Track first and last widget IDs for wrap-around
     if (ctx->FirstId == 0)
+    {
         ctx->FirstId = id;
+    }
 
     ctx->LastId = id;
 
     // If nothing is focused yet, focus the first interactive widget
     if (ctx->FocusId == 0)
+    {
         ctx->FocusId = id;
+    }
 
     // Build the focus chain: find what comes after and before the current focus
     static uint32_t s_PrevId       = 0;
@@ -83,8 +87,11 @@ TUI_LayoutAdvance(TUI_Context ctx, int w, int h)
     else // HORIZONTAL
     {
         ctx->Cursor.X += w + ctx->Margin;
+
         if (h > ctx->RowMaxHeight)
+        {
             ctx->RowMaxHeight = h;
+        }
     }
 }
 
@@ -166,7 +173,7 @@ TUI_WindowBegin(TUI_Context ctx, int x, int y, int w, int h, const char* title)
     {
         for (int col = 1; col < w - 1; col++)
         {
-            TUI_RenderPut(ctx, absX + col, absY + row, ' ', ctx->CurrentAttr);
+            TUI_RenderPut(ctx, absX + col, absY + row, " ", ctx->CurrentAttr);
         }
     }
 
@@ -183,12 +190,16 @@ TUI_WindowBegin(TUI_Context ctx, int x, int y, int w, int h, const char* title)
 
         int tx = x + (w - titleLen - 2) / 2;
 
-        TUI_DrawChar(ctx, tx, y, ' ');
-
-        for (int i = 0; i < titleLen; i++)
-            TUI_DrawChar(ctx, tx + 1 + i, y, title[i]);
+        TUI_DrawChar(ctx, tx, y, " ");
         
-        TUI_DrawChar(ctx, tx + 1 + titleLen, y, ' ');
+        for (int i = 0; i < titleLen; i++)
+        {
+            char temp[2] = { title[i], '\0' };
+
+            TUI_DrawChar(ctx, tx + 1 + i, y, temp);
+        }
+
+        TUI_DrawChar(ctx, tx + 1 + titleLen, y, " ");
     }
 
     // Set new origin to inside the window (1 cell padding from border)

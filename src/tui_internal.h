@@ -27,8 +27,8 @@ typedef struct
 // A single cell in the screen buffer.
 typedef struct
 {
-    char     Ch;   // The character to display
-    TUI_Attr Attr; // Packed fg/bg color attribute
+    char     Ch[4]; // The character to display (UTF-8, up to 3 bytes + null)
+    TUI_Attr Attr;  // Packed fg/bg color attribute
 } TUI_Cell;
 
 // ╭────────────────────────────────────────────────────────────────────╮
@@ -115,7 +115,7 @@ int  TUI_TerminalPollKey(void);
 void TUI_RenderAlloc(TUI_Context ctx, int w, int h);
 void TUI_RenderFree(TUI_Context ctx);
 void TUI_RenderClear(TUI_Context ctx, TUI_Attr attr);
-void TUI_RenderPut(TUI_Context ctx, int x, int y, char ch, TUI_Attr attr);
+void TUI_RenderPut(TUI_Context ctx, int x, int y, const char* ch, TUI_Attr attr);
 void TUI_RenderFlush(TUI_Context ctx);
 void TUI_RenderSetCtx(TUI_Context ctx);
 

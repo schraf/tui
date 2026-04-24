@@ -111,7 +111,7 @@ void
 TUI_OutFree(TUI_Context ctx)
 {
     free(ctx->OutBuf);
-    
+
     ctx->OutBuf    = NULL;
     ctx->OutBufLen = 0;
     ctx->OutBufCap = 0;
@@ -123,12 +123,14 @@ TUI_OutAppend(TUI_Context ctx, const char* data, int len)
     if (ctx->OutBufLen + len > ctx->OutBufCap)
     {
         while (ctx->OutBufLen + len > ctx->OutBufCap)
+        {
             ctx->OutBufCap *= 2;
+        }
+
         ctx->OutBuf = (char*)realloc(ctx->OutBuf, (size_t)ctx->OutBufCap);
     }
 
     memcpy(ctx->OutBuf + ctx->OutBufLen, data, (size_t)len);
-
     ctx->OutBufLen += len;
 }
 
@@ -137,11 +139,11 @@ TUI_OutAppendf(TUI_Context ctx, const char* fmt, ...)
 {
     char    buf[256];
     va_list args;
-    
+
     va_start(args, fmt);
     int n = vsnprintf(buf, sizeof(buf), fmt, args);
     va_end(args);
-    
+
     if (n > 0)
     {
         TUI_OutAppend(ctx, buf, n);
@@ -166,7 +168,6 @@ void
 TUI_RenderAlloc(TUI_Context ctx, int w, int h)
 {
     size_t count  = (size_t)(w * h);
-
     ctx->FrontBuf = (TUI_Cell*)malloc(count * sizeof(TUI_Cell));
     ctx->BackBuf  = (TUI_Cell*)malloc(count * sizeof(TUI_Cell));
     ctx->BufWidth  = w;
@@ -175,10 +176,13 @@ TUI_RenderAlloc(TUI_Context ctx, int w, int h)
     // Initialize both buffers to spaces with default attribute
     for (size_t i = 0; i < count; i++)
     {
-        ctx->FrontBuf[i].Ch   = ' ';
-        ctx->FrontBuf[i].Attr = TUI_DEFAULT_ATTR;
-        ctx->BackBuf[i].Ch    = ' ';
-        ctx->BackBuf[i].Attr  = TUI_DEFAULT_ATTR;
+        ctx->FrontBuf[i].Ch[0] = ' ';
+        ctx->FrontBuf[i].Ch[1] = '\0';
+        ctx->FrontBuf[i].Attr  = TUI_DEFAULT_ATTR;
+
+        ctx->BackBuf[i].Ch[0]  = ' ';
+        ctx->BackBuf[i].Ch[1]  = '\0';
+        ctx->BackBuf[i].Attr   = TUI_DEFAULT_ATTR;
     }
 }
 
@@ -201,8 +205,9 @@ TUI_RenderClear(TUI_Context ctx, TUI_Attr attr)
 
     for (int i = 0; i < count; i++)
     {
-        ctx->BackBuf[i].Ch   = ' ';
-        ctx->BackBuf[i].Attr = attr;
+        ctx->BackBuf[i].Ch[0] = ' ';
+        ctx->BackBuf[i].Ch[1] = '\0';
+        ctx->BackBuf[i].Attr  = attr;
     }
 }
 
@@ -211,7 +216,7 @@ TUI_RenderClear(TUI_Context ctx, TUI_Attr attr)
 // ╰────────────────────────────────────────────────────────────────────╯
 
 void
-TUI_RenderPut(TUI_Context ctx, int x, int y, char ch, TUI_Attr attr)
+TUI_RenderPut(TUI_Context ctx, int x, int y, const char* ch, TUI_Attr attr)
 {
     // Bounds check against buffer
     if (x < 0 || y < 0 || x >= ctx->BufWidth || y >= ctx->BufHeight)
@@ -221,7 +226,6 @@ TUI_RenderPut(TUI_Context ctx, int x, int y, char ch, TUI_Attr attr)
 
     // Clip check
     TUI_Rect* clip = &ctx->ClipRect;
-
     if (x < clip->X || y < clip->Y || x >= clip->X + clip->W || y >= clip->Y + clip->H)
     {
         return;
@@ -229,8 +233,10 @@ TUI_RenderPut(TUI_Context ctx, int x, int y, char ch, TUI_Attr attr)
 
     int idx = y * ctx->BufWidth + x;
 
-    ctx->BackBuf[idx].Ch   = ch;
-    ctx->BackBuf[idx].Attr = attr;
+    strncpy(ctx->BackBuf[idx].Ch, ch, 3);
+    
+    ctx->BackBuf[idx].Ch[3] = '\0';
+    ctx->BackBuf[idx].Attr   = attr;
 }
 
 // ╭────────────────────────────────────────────────────────────────────╮
@@ -252,7 +258,7 @@ TUI_RenderFlush(TUI_Context ctx)
         {
             int idx = y * w + x;
 
-            if (back[idx].Ch == front[idx].Ch && back[idx].Attr == front[idx].Attr)
+            if (strcmp(back[idx].Ch, front[idx].Ch) == 0 && back[idx].Attr == front[idx].Attr)
             {
                 continue; // No change
             }
@@ -267,16 +273,15 @@ TUI_RenderFlush(TUI_Context ctx)
                 int bg = (back[idx].Attr >> 4) & 0x0F;
 
                 TUI_OutAppendf(ctx, "\033[%d;%dm", s_FgAnsi[fg], s_BgAnsi[bg]);
-
                 lastAttr = back[idx].Attr;
             }
 
             // Emit character
-            char ch = back[idx].Ch;
-            TUI_OutAppend(ctx, &ch, 1);
+            TUI_OutAppend(ctx, back[idx].Ch, (int)strlen(back[idx].Ch));
 
             // Update front buffer
-            front[idx] = back[idx];
+            strcpy(front[idx].Ch, back[idx].Ch);
+            front[idx].Attr = back[idx].Attr;
         }
     }
 

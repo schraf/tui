@@ -74,8 +74,8 @@ TUI_Init(TUI_Context* ctx)
     int count = c->BufWidth * c->BufHeight;
     for (int i = 0; i < count; i++)
     {
-        c->FrontBuf[i].Ch   = 0;
-        c->FrontBuf[i].Attr = 0xFF;
+        c->FrontBuf[i].Ch[0] = 0;
+        c->FrontBuf[i].Attr  = 0xFF;
     }
 }
 
@@ -120,11 +120,10 @@ TUI_Begin(TUI_Context ctx)
 
         // Force full redraw
         int count = ctx->BufWidth * ctx->BufHeight;
-
         for (int i = 0; i < count; i++)
         {
-            ctx->FrontBuf[i].Ch   = 0;
-            ctx->FrontBuf[i].Attr = 0xFF;
+            ctx->FrontBuf[i].Ch[0] = 0;
+            ctx->FrontBuf[i].Attr  = 0xFF;
         }
 
         // Update clip rect
