@@ -43,7 +43,7 @@ main(void)
 
         // Blue desktop background
         TUI_SetColor(TUI_COLOR_WHITE, TUI_COLOR_BLUE);
-        TUI_FillRect(ctx, 0, 0, sw, sh, " ");
+        //TUI_FillRect(ctx, 0, 0, sw, sh, " ");
 
         // Status bar
         TUI_StatusBar(ctx, " Press Tab to navigate | Enter to select | Esc to quit");

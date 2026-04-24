@@ -100,6 +100,18 @@ struct TUI_Context
 };
 
 // ╭────────────────────────────────────────────────────────────────────╮
+// │ Internal Functions - Drawing (tui_draw.c)                          │
+// ╰────────────────────────────────────────────────────────────────────╯
+
+void TUI_DrawChar(TUI_Context ctx, int x, int y, const char* c);
+void TUI_DrawText(TUI_Context ctx, int x, int y, const char* text);
+void TUI_DrawBox(TUI_Context ctx, int x, int y, int w, int h, bool doubleLine);
+void TUI_FillRect(TUI_Context ctx, int x, int y, int w, int h, const char* c);
+void TUI_DrawHLine(TUI_Context ctx, int x, int y, int len, const char* c);
+void TUI_DrawVLine(TUI_Context ctx, int x, int y, int len, const char* c);
+void TUI_DrawShadow(TUI_Context ctx, int x, int y, int w, int h);
+
+// ╭────────────────────────────────────────────────────────────────────╮
 // │ Internal Functions - Terminal (tui_terminal.c)                      │
 // ╰────────────────────────────────────────────────────────────────────╯
 
