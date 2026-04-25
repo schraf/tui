@@ -14,7 +14,7 @@
 #include <unistd.h>
 
 // ╭────────────────────────────────────────────────────────────────────╮
-// │ Color Mapping                                                      │
+// │ Color & Style Mapping                                              │
 // ╰────────────────────────────────────────────────────────────────────╯
 
 // Map TUI_Color (0-15) -> ANSI foreground escape code number
@@ -57,14 +57,23 @@ static const int s_BgAnsi[16] = {
     107, // 15 WHITE
 };
 
+// Index matches the bit shift: (1 << 0) is Bold, (1 << 1) is Dim, etc.
+static const int s_StyleAnsi[] = {
+    1, // BOLD
+    2, // DIM
+    3, // ITALIC
+    4, // UNDERLINE
+    5  // BLINK
+};
+
 // ╭────────────────────────────────────────────────────────────────────╮
 // │ Public Color API                                                   │
 // ╰────────────────────────────────────────────────────────────────────╯
 
 TUI_Attr
-TUI_MakeAttr(TUI_Color fg, TUI_Color bg)
+TUI_MakeAttr(TUI_Color fg, TUI_Color bg, uint8_t styles)
 {
-    return (TUI_Attr)(((bg & 0x0F) << 4) | (fg & 0x0F));
+    return (TUI_Attr)((styles << 8) | ((bg & 0x0F) << 4) | (fg & 0x0F));
 }
 
 // File-scope pointer so TUI_SetColor/TUI_SetAttr can work without
@@ -149,22 +158,24 @@ TUI_OutFlush(TUI_Context ctx)
 void
 TUI_RenderAlloc(TUI_Context ctx, int w, int h)
 {
+    TUI_Theme theme = TUI_GetActiveTheme(ctx);
+
     size_t count  = (size_t)(w * h);
     ctx->FrontBuf = (TUI_Cell*)malloc(count * sizeof(TUI_Cell));
     ctx->BackBuf  = (TUI_Cell*)malloc(count * sizeof(TUI_Cell));
     ctx->BufWidth  = w;
     ctx->BufHeight = h;
 
-    // Initialize both buffers to spaces with default attribute
+    // Initialize both buffers to spaces 
     for (size_t i = 0; i < count; i++)
     {
         ctx->FrontBuf[i].Ch[0] = ' ';
         ctx->FrontBuf[i].Ch[1] = '\0';
-        ctx->FrontBuf[i].Attr  = TUI_DEFAULT_ATTR;
+        ctx->FrontBuf[i].Attr  = theme.Window.Normal;
 
         ctx->BackBuf[i].Ch[0]  = ' ';
         ctx->BackBuf[i].Ch[1]  = '\0';
-        ctx->BackBuf[i].Attr   = TUI_DEFAULT_ATTR;
+        ctx->BackBuf[i].Attr   = theme.Window.Normal;
     }
 }
 
@@ -253,8 +264,21 @@ TUI_RenderFlush(TUI_Context ctx)
             {
                 int fg = back[idx].Attr & 0x0F;
                 int bg = (back[idx].Attr >> 4) & 0x0F;
+                int styles = (back[idx].Attr >> 8) & 0x1F;
 
-                TUI_OutAppendf(ctx, "\033[%d;%dm", s_FgAnsi[fg], s_BgAnsi[bg]);
+                // Start the sequence
+                TUI_OutAppendf(ctx, "\033[0m\033[");
+
+                // Append active styles
+                for (int i = 0; i < 5; i++) {
+                    if (styles & (1 << i)) {
+                        TUI_OutAppendf(ctx, "%d;", s_StyleAnsi[i]);
+                    }
+                }
+                
+                // Append colors and close the sequence
+                TUI_OutAppendf(ctx, "%d;%dm", s_FgAnsi[fg], s_BgAnsi[bg]);
+
                 lastAttr = back[idx].Attr;
             }
 

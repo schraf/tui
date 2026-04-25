@@ -78,7 +78,7 @@ int TUI_GetKey(TUI_Context ctx);
 // │ Colors & Attributes                                                │
 // ╰────────────────────────────────────────────────────────────────────╯
 
-// CGA/EGA-compatible 16-color palette
+// 16-color palette
 typedef enum {
     TUI_COLOR_BLACK        = 0,
     TUI_COLOR_BLUE         = 1,
@@ -98,11 +98,18 @@ typedef enum {
     TUI_COLOR_WHITE        = 15
 } TUI_Color;
 
-// Packed color attribute: low nibble = foreground, high nibble = background
-// Mirrors the DOS video attribute byte layout.
-typedef uint8_t TUI_Attr;
+typedef enum {
+    TUI_TEXT_BOLD      = (1 << 0),
+    TUI_TEXT_DIM       = (1 << 1),
+    TUI_TEXT_ITALIC    = (1 << 2),
+    TUI_TEXT_UNDERLINE = (1 << 3),
+    TUI_TEXT_BLINK     = (1 << 4) 
+} TUI_TextStyle;
 
-TUI_Attr TUI_MakeAttr(TUI_Color fg, TUI_Color bg);
+// Packed attributes
+typedef uint16_t TUI_Attr;
+
+TUI_Attr TUI_MakeAttr(TUI_Color fg, TUI_Color bg, uint8_t styles);
 
 // ╭────────────────────────────────────────────────────────────────────╮
 // │ Styles & Themes                                                    │
@@ -117,11 +124,15 @@ typedef struct {
 
 // A Theme is a collection of styles for the entire UI
 typedef struct {
+    TUI_Color Background;  // Screen cleared to this color
     TUI_Style Window;      // Frame and background
+    TUI_Style TitleBar;    // Top title bar
+    TUI_Style StatusBar;   // Bottom status bar
     TUI_Style Button;      // Standard buttons
     TUI_Style Input;       // Text fields and checkboxes
     TUI_Style Label;       // Static text
     TUI_Style Selection;   // Highlighted items in lists/menus
+    TUI_Style ProgressBar; // Progress bar
     TUI_Attr  Shadow;      // Color of the window drop-shadow
 } TUI_Theme;
 
@@ -197,6 +208,9 @@ bool TUI_ListBox(TUI_Context ctx, uint32_t id, int w, int h,
 // Menu bar drawn at the top of the screen.
 void TUI_MenuBar(TUI_Context ctx, const char** items, int itemCount,
                  int* selected);
+
+// Title bar drawn at the top of the screen.
+void TUI_TitleBar(TUI_Context ctx, const char* text);
 
 // Status bar drawn at the bottom of the screen.
 void TUI_StatusBar(TUI_Context ctx, const char* text);

@@ -107,6 +107,9 @@ TUI_Shutdown(TUI_Context* ctx)
 void
 TUI_Begin(TUI_Context ctx)
 {
+    // Get the current theme
+    TUI_Theme theme = TUI_GetActiveTheme(ctx);
+
     // Set the render context
     TUI_RenderSetCtx(ctx);
 
@@ -137,7 +140,7 @@ TUI_Begin(TUI_Context ctx)
     }
 
     // Clear back buffer
-    TUI_RenderClear(ctx, TUI_DEFAULT_ATTR);
+    TUI_RenderClear(ctx, TUI_MakeAttr(theme.Background, theme.Background, 0));
 
     // Poll input
     ctx->LastKey = TUI_TerminalPollKey();

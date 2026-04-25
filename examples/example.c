@@ -24,7 +24,8 @@ main(void)
 {
     TUI_Context ctx;
     TUI_Init(&ctx);
-    TUI_SetTheme(TUI_GetTurboTheme());
+    
+    //TUI_SetTheme(ctx, TUI_GetTurboTheme());
 
     // State
     Page  page           = PAGE_WELCOME;
@@ -42,7 +43,8 @@ main(void)
         int sw = TUI_GetScreenWidth(ctx);
         int sh = TUI_GetScreenHeight(ctx);
 
-        //TUI_FillRect(ctx, 0, 0, sw, sh, " ");
+        // Title bar
+        TUI_TitleBar(ctx, " TUI Example Program");
 
         // Status bar
         TUI_StatusBar(ctx, " Press Tab to navigate | Enter to select | Esc to quit");
@@ -177,7 +179,7 @@ main(void)
             TUI_LayoutSpace(ctx, 1);
             TUI_Label(ctx, "Extracting files:");
             TUI_LayoutSpace(ctx, 1);
-            TUI_ProgressBar(ctx, winW - 4, progress);
+            TUI_ProgressBar(ctx, winW - 6, progress);
 
             TUI_LayoutSetCursor(ctx, 1, 7);
             if (progress < 0.25f)

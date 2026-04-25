@@ -203,7 +203,7 @@ TUI_WindowBegin(TUI_Context ctx, int x, int y, int w, int h, const char* title)
     int absY = ctx->Origin.Y + y;
 
     // Draw the window shadow
-    TUI_DrawShadow(ctx, attr, x, y, w, h);
+    TUI_DrawShadow(ctx, theme.Shadow, x, y, w, h);
 
     // Draw the window box
     TUI_DrawBox(ctx, attr, x, y, w, h, true);

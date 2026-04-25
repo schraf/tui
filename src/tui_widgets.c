@@ -16,9 +16,10 @@
 void
 TUI_Label(TUI_Context ctx, const char* text)
 {
-    int     w   = (int)strlen(text);
+    int w = (int)strlen(text);
     TUI_Pos pos = TUI_LayoutGetCursor(ctx, w);
-    TUI_DrawText(ctx, pos.X, pos.Y, text);
+    TUI_Theme theme = TUI_GetActiveTheme(ctx);
+    TUI_DrawText(ctx, theme.Label.Normal, pos.X, pos.Y, text);
     TUI_LayoutAdvance(ctx, w, 1);
 }
 
@@ -32,34 +33,29 @@ TUI_Button(TUI_Context ctx, uint32_t id, int w, const char* label)
     bool focused  = TUI_FocusRegister(ctx, id);
     int  labelLen = (int)strlen(label);
 
-    // Clamp button width: at minimum "[ X ]" = label + 4
-    if (w < labelLen + 4)
+    // Clamp button width: at minimum " X " = label + 2
+    if (w < labelLen + 2)
     {
-        w = labelLen + 4;
+        w = labelLen + 2;
     }
 
     TUI_Pos pos = TUI_LayoutGetCursor(ctx, w);
     int x = pos.X;
     int y = pos.Y;
 
-    // Save current attr, set highlight if focused
-    TUI_Attr saved = ctx->CurrentAttr;
+    TUI_Theme theme = TUI_GetActiveTheme(ctx);
+    TUI_Attr attr = focused ? theme.Button.Hot : theme.Button.Normal;
 
-    if (focused)
+    if (focused && (ctx->LastKey == TUI_KEY_ENTER || ctx->LastKey == ' '))
     {
-        // Invert colors for focused button
-        int fg = (saved >> 4) & 0x0F;
-        int bg = saved & 0x0F;
-
-        ctx->CurrentAttr = (TUI_Attr)((bg << 4) | fg);
+        attr = theme.Button.Active;
     }
 
-    // Draw button: "[ label ]" padded to width w
-    TUI_DrawChar(ctx, x, y, "[");
-    TUI_DrawChar(ctx, x + 1, y, " ");
+    // Draw button: " label " padded to width w
+    TUI_DrawChar(ctx, attr, x, y, " ");
 
     // Center label within the button
-    int innerW  = w - 4; // Space between "[ " and " ]"
+    int innerW  = w - 2; // Space between " " and " "
     int padLeft = (innerW - labelLen) / 2;
 
     for (int i = 0; i < innerW; i++)
@@ -67,18 +63,16 @@ TUI_Button(TUI_Context ctx, uint32_t id, int w, const char* label)
         if (i >= padLeft && i < padLeft + labelLen)
         {
             char temp[2] = { label[i - padLeft], '\0' };
-            TUI_DrawChar(ctx, x + 2 + i, y, temp);
+            TUI_DrawChar(ctx, attr, x + 1 + i, y, temp);
         }
         else
         {
-            TUI_DrawChar(ctx, x + 2 + i, y, " ");
+            TUI_DrawChar(ctx, attr, x + 1 + i, y, " ");
         }
     }
 
-    TUI_DrawChar(ctx, x + w - 2, y, " ");
-    TUI_DrawChar(ctx, x + w - 1, y, "]");
+    TUI_DrawChar(ctx, attr, x + w - 1, y, " ");
 
-    ctx->CurrentAttr = saved;
     TUI_LayoutAdvance(ctx, w, 1);
 
     // Activate on Enter or Space
@@ -102,30 +96,26 @@ TUI_Checkbox(TUI_Context ctx, uint32_t id, const char* label, bool* value)
         changed = true;
     }
 
-    int     w   = 4 + (int)strlen(label);
+    int w = 4 + (int)strlen(label);
     TUI_Pos pos = TUI_LayoutGetCursor(ctx, w);
     int x = pos.X;
     int y = pos.Y;
 
-    // Save current attr, highlight if focused
-    TUI_Attr saved = ctx->CurrentAttr;
+    TUI_Theme theme = TUI_GetActiveTheme(ctx);
+    TUI_Attr attr = focused ? theme.Input.Hot : theme.Input.Normal;
 
-    if (focused)
+    if (focused && (ctx->LastKey == TUI_KEY_ENTER || ctx->LastKey == ' '))
     {
-        int fg = (saved >> 4) & 0x0F;
-        int bg = saved & 0x0F;
-
-        ctx->CurrentAttr = (TUI_Attr)((bg << 4) | fg);
+        attr = theme.Input.Active;
     }
 
     // Draw: "[X] label" or "[ ] label"
-    TUI_DrawChar(ctx, x, y, "[");
-    TUI_DrawChar(ctx, x + 1, y, *value ? "X" : " ");
-    TUI_DrawChar(ctx, x + 2, y, "]");
-    TUI_DrawChar(ctx, x + 3, y, " ");
-    TUI_DrawText(ctx, x + 4, y, label);
+    TUI_DrawChar(ctx, attr, x, y, "[");
+    TUI_DrawChar(ctx, attr, x + 1, y, *value ? "X" : " ");
+    TUI_DrawChar(ctx, attr, x + 2, y, "]");
+    TUI_DrawChar(ctx, attr, x + 3, y, " ");
+    TUI_DrawText(ctx, attr, x + 4, y, label);
 
-    ctx->CurrentAttr = saved;
     TUI_LayoutAdvance(ctx, w, 1);
 
     return changed;
@@ -152,31 +142,27 @@ TUI_RadioButton(TUI_Context ctx, uint32_t id,
         }
     }
 
-    bool    isSelected = (*selected == value);
-    int     w          = 4 + (int)strlen(label);
-    TUI_Pos pos        = TUI_LayoutGetCursor(ctx, w);
+    bool isSelected = (*selected == value);
+    int w = 4 + (int)strlen(label);
+    TUI_Pos pos = TUI_LayoutGetCursor(ctx, w);
     int x = pos.X;
     int y = pos.Y;
 
-    // Save current attr, highlight if focused
-    TUI_Attr saved = ctx->CurrentAttr;
+    TUI_Theme theme = TUI_GetActiveTheme(ctx);
+    TUI_Attr attr = focused ? theme.Input.Hot : theme.Input.Normal;
 
-    if (focused)
+    if (focused && (ctx->LastKey == TUI_KEY_ENTER || ctx->LastKey == ' '))
     {
-        int fg = (saved >> 4) & 0x0F;
-        int bg = saved & 0x0F;
-
-        ctx->CurrentAttr = (TUI_Attr)((bg << 4) | fg);
+        attr = theme.Input.Active;
     }
 
-    // Draw: "(o) label" or "( ) label"
-    TUI_DrawChar(ctx, x, y, "(");
-    TUI_DrawChar(ctx, x + 1, y, isSelected ? "o" : " ");
-    TUI_DrawChar(ctx, x + 2, y, ")");
-    TUI_DrawChar(ctx, x + 3, y, " ");
-    TUI_DrawText(ctx, x + 4, y, label);
+    // Draw: "(·) label" or "( ) label"
+    TUI_DrawChar(ctx, attr, x, y, "(");
+    TUI_DrawChar(ctx, attr, x + 1, y, isSelected ? "·" : " ");
+    TUI_DrawChar(ctx, attr, x + 2, y, ")");
+    TUI_DrawChar(ctx, attr, x + 3, y, " ");
+    TUI_DrawText(ctx, attr, x + 4, y, label);
 
-    ctx->CurrentAttr = saved;
     TUI_LayoutAdvance(ctx, w, 1);
 
     return changed;
@@ -203,17 +189,14 @@ TUI_ProgressBar(TUI_Context ctx, int w, float fraction)
     int x = pos.X;
     int y = pos.Y;
 
-    // Outer brackets
-    TUI_DrawChar(ctx, x, y, "[");
-    TUI_DrawChar(ctx, x + w - 1, y, "]");
+    TUI_Theme theme = TUI_GetActiveTheme(ctx);
+    TUI_Attr attr = theme.ProgressBar.Normal;
 
-    // Inner fill area
-    int innerW = w - 2;
-    int filled = (int)(fraction * (float)innerW + 0.5f);
+    int filled = (int)(fraction * (float)w + 0.5f);
 
-    for (int i = 0; i < innerW; i++)
+    for (int i = 0; i < w; i++)
     {
-        TUI_DrawChar(ctx, x + 1 + i, y, (i < filled) ? "\u2588" : "\u2591");
+        TUI_DrawChar(ctx, attr, x + 1 + i, y, (i < filled) ? "\u2588" : "\u2591");
     }
 
     TUI_LayoutAdvance(ctx, w, 1);
@@ -263,20 +246,8 @@ TUI_TextInput(TUI_Context ctx, uint32_t id, int w,
     int x = pos.X;
     int y = pos.Y;
 
-    // Save current attr
-    TUI_Attr saved = ctx->CurrentAttr;
-
-    // Draw input field background
-    if (focused)
-    {
-        // Bright white on blue for focused input
-        ctx->CurrentAttr = TUI_MakeAttr(TUI_COLOR_WHITE, TUI_COLOR_BLUE);
-    }
-    else
-    {
-        // White on dark gray for unfocused input
-        ctx->CurrentAttr = TUI_MakeAttr(TUI_COLOR_WHITE, TUI_COLOR_DARKGRAY);
-    }
+    TUI_Theme theme = TUI_GetActiveTheme(ctx);
+    TUI_Attr attr = focused ? theme.Input.Hot : theme.Input.Normal;
 
     // The visible area is w characters wide
     // Show the tail of the string if it's longer than the field
@@ -293,11 +264,11 @@ TUI_TextInput(TUI_Context ctx, uint32_t id, int w,
         if (bufIdx < len)
         {
             char temp[2] = { buffer[bufIdx], '\0' };
-            TUI_DrawChar(ctx, x + i, y, temp);
+            TUI_DrawChar(ctx, attr, x + i, y, temp);
         }
         else
         {
-            TUI_DrawChar(ctx, x + i, y, " ");
+            TUI_DrawChar(ctx, attr, x + i, y, " ");
         }
     }
 
@@ -308,8 +279,7 @@ TUI_TextInput(TUI_Context ctx, uint32_t id, int w,
 
         if (cursorPos >= 0 && cursorPos < w)
         {
-            // Invert the cursor position
-            TUI_Attr cursorAttr = TUI_MakeAttr(TUI_COLOR_BLUE, TUI_COLOR_WHITE);
+            TUI_Attr cursorAttr = theme.Input.Active;
 
             int absX = ctx->Origin.X + x + cursorPos;
             int absY = ctx->Origin.Y + y;
@@ -317,7 +287,6 @@ TUI_TextInput(TUI_Context ctx, uint32_t id, int w,
         }
     }
 
-    ctx->CurrentAttr = saved;
     TUI_LayoutAdvance(ctx, w, 1);
 
     return changed;
@@ -410,9 +379,11 @@ TUI_ListBox(TUI_Context ctx, uint32_t id, int w, int h,
     int x = pos.X;
     int y = pos.Y;
 
+    TUI_Theme theme = TUI_GetActiveTheme(ctx);
+    TUI_Attr borderAttr = theme.Input.Normal;
+    
     // Draw border
-    TUI_Attr saved = ctx->CurrentAttr;
-    TUI_DrawBox(ctx, x, y, w, h, false);
+    TUI_DrawBox(ctx, borderAttr, x, y, w, h, false);
 
     // Draw items
     int innerW = w - 2;
@@ -422,22 +393,18 @@ TUI_ListBox(TUI_Context ctx, uint32_t id, int w, int h,
         int itemIdx = *scrollOffset + row;
         bool isSelected = (itemIdx == *selected);
 
+        TUI_Attr itemAttr;
         if (isSelected && focused)
         {
-            // Highlighted selection
-            int fg = (saved >> 4) & 0x0F;
-            int bg = saved & 0x0F;
-
-            ctx->CurrentAttr = (TUI_Attr)((bg << 4) | fg);
+            itemAttr = theme.Selection.Active;
         }
         else if (isSelected)
         {
-            // Selected but not focused -- subtle highlight
-            ctx->CurrentAttr = TUI_MakeAttr(TUI_COLOR_WHITE, TUI_COLOR_DARKGRAY);
+            itemAttr = theme.Selection.Normal;
         }
         else
         {
-            ctx->CurrentAttr = saved;
+            itemAttr = borderAttr;
         }
 
         // Draw item text, truncated and padded to fill width
@@ -449,11 +416,11 @@ TUI_ListBox(TUI_Context ctx, uint32_t id, int w, int h,
             if (col < itemLen)
             {
                 char temp[2] = { item[col], '\0' };
-                TUI_DrawChar(ctx, x + 1 + col, y + 1 + row, temp);
+                TUI_DrawChar(ctx, itemAttr, x + 1 + col, y + 1 + row, temp);
             }
             else
             {
-                TUI_DrawChar(ctx, x + 1 + col, y + 1 + row, " ");
+                TUI_DrawChar(ctx, itemAttr, x + 1 + col, y + 1 + row, " ");
             }
         }
     }
@@ -482,11 +449,10 @@ TUI_ListBox(TUI_Context ctx, uint32_t id, int w, int h,
         for (int row = 0; row < visibleRows; row++)
         {
             const char* ch = (row == thumbPos) ? "\u2588" : "\u2502";
-            TUI_DrawChar(ctx, x + w - 1, y + 1 + row, ch);
+            TUI_DrawChar(ctx, borderAttr, x + w - 1, y + 1 + row, ch);
         }
     }
 
-    ctx->CurrentAttr = saved;
     TUI_LayoutAdvance(ctx, w, h);
 
     return changed;
@@ -500,14 +466,16 @@ void
 TUI_MenuBar(TUI_Context ctx, const char** items, int itemCount, int* selected)
 {
     // MenuBar is drawn at absolute row 0, ignoring Origin
-    TUI_Attr saved      = ctx->CurrentAttr;
     TUI_Pos  savedOrig  = ctx->Origin;
     ctx->Origin.X = 0;
     ctx->Origin.Y = 0;
 
+    TUI_Theme theme = TUI_GetActiveTheme(ctx);
+    TUI_Attr bgAttr = theme.Window.Normal;
+    TUI_Attr selAttr = theme.Selection.Normal;
+
     // Menu bar background: fill the entire top row
-    ctx->CurrentAttr = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_LIGHTGRAY);
-    TUI_FillRect(ctx, 0, 0, ctx->ScreenWidth, 1, " ");
+    TUI_FillRect(ctx, bgAttr, 0, 0, ctx->ScreenWidth, 1, " ");
 
     // Handle keyboard: Left/Right to navigate
     if (ctx->LastKey == TUI_KEY_LEFT && *selected > 0)
@@ -526,25 +494,40 @@ TUI_MenuBar(TUI_Context ctx, const char** items, int itemCount, int* selected)
     for (int i = 0; i < itemCount; i++)
     {
         int itemLen = (int)strlen(items[i]);
+        TUI_Attr itemAttr = (i == *selected) ? selAttr : bgAttr;
 
-        if (i == *selected)
-        {
-            ctx->CurrentAttr = TUI_MakeAttr(TUI_COLOR_WHITE, TUI_COLOR_BLACK);
-        }
-        else
-        {
-            ctx->CurrentAttr = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_LIGHTGRAY);
-        }
-
-        TUI_DrawChar(ctx, xPos, 0, " ");
-        TUI_DrawText(ctx, xPos + 1, 0, items[i]);
-        TUI_DrawChar(ctx, xPos + 1 + itemLen, 0, " ");
+        TUI_DrawChar(ctx, itemAttr, xPos, 0, " ");
+        TUI_DrawText(ctx, itemAttr, xPos + 1, 0, items[i]);
+        TUI_DrawChar(ctx, itemAttr, xPos + 1 + itemLen, 0, " ");
 
         xPos += itemLen + 3; // " item " + 1 spacing
     }
 
-    ctx->CurrentAttr = saved;
-    ctx->Origin      = savedOrig;
+    ctx->Origin = savedOrig;
+}
+
+// ╭────────────────────────────────────────────────────────────────────╮
+// │ TUI_TitleBar                                                       │
+// ╰────────────────────────────────────────────────────────────────────╯
+
+void
+TUI_TitleBar(TUI_Context ctx, const char* text)
+{
+    // TitleBar is drawn at the absolute top row, ignoring Origin
+    TUI_Pos savedOrig = ctx->Origin;
+
+    ctx->Origin.X = 0;
+    ctx->Origin.Y = 0;
+
+    TUI_Theme theme = TUI_GetActiveTheme(ctx);
+    TUI_Attr attr = theme.TitleBar.Normal;
+
+    TUI_FillRect(ctx, attr, 0, 0, ctx->ScreenWidth, 1, " ");
+
+    TUI_DrawChar(ctx, attr, 0, 0, " ");
+    TUI_DrawText(ctx, attr, 1, 0, text);
+
+    ctx->Origin = savedOrig;
 }
 
 // ╭────────────────────────────────────────────────────────────────────╮
@@ -555,22 +538,21 @@ void
 TUI_StatusBar(TUI_Context ctx, const char* text)
 {
     // StatusBar is drawn at the absolute bottom row, ignoring Origin
-    TUI_Attr saved      = ctx->CurrentAttr;
-    TUI_Pos  savedOrig  = ctx->Origin;
+    TUI_Pos savedOrig = ctx->Origin;
 
     ctx->Origin.X = 0;
     ctx->Origin.Y = 0;
 
     int row = ctx->ScreenHeight - 1;
+    TUI_Theme theme = TUI_GetActiveTheme(ctx);
+    TUI_Attr attr = theme.StatusBar.Normal;
 
-    ctx->CurrentAttr = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_LIGHTGRAY);
-    TUI_FillRect(ctx, 0, row, ctx->ScreenWidth, 1, " ");
+    TUI_FillRect(ctx, attr, 0, row, ctx->ScreenWidth, 1, " ");
 
-    TUI_DrawChar(ctx, 0, row, " ");
-    TUI_DrawText(ctx, 1, row, text);
+    TUI_DrawChar(ctx, attr, 0, row, " ");
+    TUI_DrawText(ctx, attr, 1, row, text);
 
-    ctx->CurrentAttr = saved;
-    ctx->Origin      = savedOrig;
+    ctx->Origin = savedOrig;
 }
 
 // ╭────────────────────────────────────────────────────────────────────╮
@@ -613,26 +595,29 @@ TUI_MessageBox(TUI_Context ctx, const char* title, const char* message,
     ctx->Origin.X = 0;
     ctx->Origin.Y = 0;
 
+    TUI_Theme theme = TUI_GetActiveTheme(ctx);
+    TUI_Attr attr = theme.Window.Normal;
+    TUI_Attr shadowAttr = theme.Shadow;
+
     // Draw shadow
-    TUI_DrawShadow(ctx, boxX, boxY, boxW, boxH);
+    TUI_DrawShadow(ctx, shadowAttr, boxX, boxY, boxW, boxH);
 
     // Draw box with filled interior
-    TUI_Attr saved = ctx->CurrentAttr;
-    TUI_FillRect(ctx, boxX, boxY, boxW, boxH, " ");
-    TUI_DrawBox(ctx, boxX, boxY, boxW, boxH, true);
+    TUI_FillRect(ctx, attr, boxX, boxY, boxW, boxH, " ");
+    TUI_DrawBox(ctx, attr, boxX, boxY, boxW, boxH, true);
 
     // Draw title
     if (title && title[0])
     {
         int tx = boxX + (boxW - titleLen - 2) / 2;
-        TUI_DrawChar(ctx, tx, boxY, " ");
-        TUI_DrawText(ctx, tx + 1, boxY, title);
-        TUI_DrawChar(ctx, tx + 1 + titleLen, boxY, " ");
+        TUI_DrawChar(ctx, attr, tx, boxY, " ");
+        TUI_DrawText(ctx, attr, tx + 1, boxY, title);
+        TUI_DrawChar(ctx, attr, tx + 1 + titleLen, boxY, " ");
     }
 
     // Draw message centered
     int mx = boxX + (boxW - msgLen) / 2;
-    TUI_DrawText(ctx, mx, boxY + 2, message);
+    TUI_DrawText(ctx, attr, mx, boxY + 2, message);
 
     // Draw buttons centered at bottom
     int btnY = boxY + boxH - 2;
@@ -668,8 +653,7 @@ TUI_MessageBox(TUI_Context ctx, const char* title, const char* message,
         }
     }
 
-    ctx->CurrentAttr = saved;
-    ctx->Origin      = savedOrig;
+    ctx->Origin = savedOrig;
 
     return result;
 }

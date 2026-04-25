@@ -38,7 +38,6 @@ typedef struct
 #define TUI_MAX_STACK       16
 #define TUI_MAX_THEME_STACK 8
 #define TUI_OUT_BUF_INIT    8192
-#define TUI_DEFAULT_ATTR    0x07 // Light gray on black (classic DOS default)
 
 // ╭────────────────────────────────────────────────────────────────────╮
 // │ State Tracking                                                     │
@@ -183,53 +182,14 @@ bool TUI_FocusRegister(TUI_Context ctx, uint32_t id);
 // --- Text Styles ---
 #define TUI_RESET       TUI_CSI "0m"
 #define TUI_BOLD        TUI_CSI "1m"
+#define TUI_DIM         TUI_CSI "2m"
+#define TUI_ITALIC      TUI_CSI "3m"
 #define TUI_UNDERLINE   TUI_CSI "4m"
 #define TUI_BLINK       TUI_CSI "5m"
-#define TUI_REVERSE     TUI_CSI "7m"    // Swap FG and BG
 #define TUI_RIS         TUI_ESC "c"     // Reset terminal to initial state
 
 // --- Alternate Screen Buffer ---
 #define TUI_ALT_BUF_ON  TUI_CSI "?1049h"
 #define TUI_ALT_BUF_OFF TUI_CSI "?1049l"
-
-// --- Foreground Colors (Standard) ---
-#define TUI_FG_BLACK    TUI_CSI "30m"
-#define TUI_FG_RED      TUI_CSI "31m"
-#define TUI_FG_GREEN    TUI_CSI "32m"
-#define TUI_FG_YELLOW   TUI_CSI "33m"
-#define TUI_FG_BLUE     TUI_CSI "34m"
-#define TUI_FG_MAGENTA  TUI_CSI "35m"
-#define TUI_FG_CYAN     TUI_CSI "36m"
-#define TUI_FG_WHITE    TUI_CSI "37m"
-
-// --- Background Colors (Standard) ---
-#define TUI_BG_BLACK    TUI_CSI "40m"
-#define TUI_BG_RED      TUI_CSI "41m"
-#define TUI_BG_GREEN    TUI_CSI "42m"
-#define TUI_BG_YELLOW   TUI_CSI "43m"
-#define TUI_BG_BLUE     TUI_CSI "44m"
-#define TUI_BG_MAGENTA  TUI_CSI "45m"
-#define TUI_BG_CYAN     TUI_CSI "46m"
-#define TUI_BG_WHITE    TUI_CSI "47m"
-
-// --- High Intensity Foreground ---
-#define TUI_FG_BRIGHT_BLACK   TUI_CSI "90m"
-#define TUI_FG_BRIGHT_RED     TUI_CSI "91m"
-#define TUI_FG_BRIGHT_GREEN   TUI_CSI "92m"
-#define TUI_FG_BRIGHT_YELLOW  TUI_CSI "93m"
-#define TUI_FG_BRIGHT_BLUE    TUI_CSI "94m"
-#define TUI_FG_BRIGHT_MAGENTA TUI_CSI "95m"
-#define TUI_FG_BRIGHT_CYAN    TUI_CSI "96m"
-#define TUI_FG_BRIGHT_WHITE   TUI_CSI "97m"
-
-// --- High Intensity Background ---
-#define TUI_BG_BRIGHT_BLACK   TUI_CSI "100m"
-#define TUI_BG_BRIGHT_RED     TUI_CSI "101m"
-#define TUI_BG_BRIGHT_GREEN   TUI_CSI "102m"
-#define TUI_BG_BRIGHT_YELLOW  TUI_CSI "103m"
-#define TUI_BG_BRIGHT_BLUE    TUI_CSI "104m"
-#define TUI_BG_BRIGHT_MAGENTA TUI_CSI "105m"
-#define TUI_BG_BRIGHT_CYAN    TUI_CSI "106m"
-#define TUI_BG_BRIGHT_WHITE   TUI_CSI "107m"
 
 #endif
