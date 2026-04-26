@@ -145,10 +145,8 @@ void TUI_PopTheme(TUI_Context ctx);
 
 // Helpers to grab standard themes
 TUI_Theme TUI_GetClassicTheme(void);
-TUI_Theme TUI_GetTurboTheme(void);
 TUI_Theme TUI_GetPaperTheme(void); 
 TUI_Theme TUI_GetMidnightTheme(void);
-TUI_Theme TUI_GetMonochromeTheme(void);
 
 // ╭────────────────────────────────────────────────────────────────────╮
 // │ Utility                                                            │

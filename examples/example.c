@@ -25,8 +25,6 @@ main(void)
     TUI_Context ctx;
     TUI_Init(&ctx);
     
-    //TUI_SetTheme(ctx, TUI_GetTurboTheme());
-
     // State
     Page  page           = PAGE_WELCOME;
     bool  acceptLicense  = false;
@@ -80,7 +78,7 @@ main(void)
             TUI_LayoutSetCursor(ctx, 1, 13);
             TUI_LayoutRowBegin(ctx);
             TUI_LayoutSpace(ctx, 28);
-            if (TUI_Button(ctx, TUI_Id("next_welcome"), 14, "Next >"))
+            if (TUI_Button(ctx, TUI_Id("next_welcome"), 14, "Next"))
                 page = PAGE_LICENSE;
             TUI_LayoutSpace(ctx, 1);
             if (TUI_Button(ctx, TUI_Id("cancel_welcome"), 12, "Cancel"))
@@ -112,10 +110,10 @@ main(void)
 
             TUI_LayoutSetCursor(ctx, 1, 13);
             TUI_LayoutRowBegin(ctx);
-            if (TUI_Button(ctx, TUI_Id("back_license"), 12, "< Back"))
+            if (TUI_Button(ctx, TUI_Id("back_license"), 12, "Back"))
                 page = PAGE_WELCOME;
             TUI_LayoutSpace(ctx, 17);
-            if (TUI_Button(ctx, TUI_Id("next_license"), 14, "Next >"))
+            if (TUI_Button(ctx, TUI_Id("next_license"), 14, "Next"))
             {
                 if (acceptLicense)
                     page = PAGE_OPTIONS;
@@ -152,10 +150,10 @@ main(void)
 
             TUI_LayoutSetCursor(ctx, 1, 13);
             TUI_LayoutRowBegin(ctx);
-            if (TUI_Button(ctx, TUI_Id("back_options"), 12, "< Back"))
+            if (TUI_Button(ctx, TUI_Id("back_options"), 12, "Back"))
                 page = PAGE_LICENSE;
             TUI_LayoutSpace(ctx, 15);
-            if (TUI_Button(ctx, TUI_Id("install"), 16, "Install >"))
+            if (TUI_Button(ctx, TUI_Id("install"), 16, "Install"))
             {
                 page     = PAGE_INSTALL;
                 progress = 0.0f;
