@@ -7,6 +7,12 @@ set(CMAKE_C_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # ╭────────────────────────────────────────────────────────────────────╮
+# │ Options                                                            │
+# ╰────────────────────────────────────────────────────────────────────╯
+
+option(BUILD_EXAMPLES "Build example applications" OFF)
+
+# ╭────────────────────────────────────────────────────────────────────╮
 # │ Functions                                                          │
 # ╰────────────────────────────────────────────────────────────────────╯
 
@@ -34,8 +40,10 @@ target_include_directories(tui PRIVATE "src")
 # │ Examples                                                           │
 # ╰────────────────────────────────────────────────────────────────────╯
 
-file(GLOB EXAMPLES_SRC "examples/*.c")
-add_executable(example ${EXAMPLES_SRC})
-set_warnings_as_errors(example)
-target_link_libraries(example tui)
+if(BUILD_EXAMPLES)
+    file(GLOB EXAMPLES_SRC "examples/*.c")
+    add_executable(example ${EXAMPLES_SRC})
+    set_warnings_as_errors(example)
+    target_link_libraries(example tui)
+endif()
 
