@@ -10,7 +10,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # │ Options                                                            │
 # ╰────────────────────────────────────────────────────────────────────╯
 
-option(BUILD_EXAMPLES "Build example applications" OFF)
+option(BUILD_EXAMPLES "Build example applications" ON)
 
 # ╭────────────────────────────────────────────────────────────────────╮
 # │ Functions                                                          │

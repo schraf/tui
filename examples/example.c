@@ -33,8 +33,8 @@ main(void)
     float progress       = 0.0f;
     bool  showQuitDialog = false;
     int   quitChoice     = -1;
+    bool  running        = true;
 
-    bool running = true;
     while (running)
     {
         TUI_Begin(ctx);

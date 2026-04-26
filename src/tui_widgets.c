@@ -568,12 +568,12 @@ TUI_MessageBox(TUI_Context ctx, const char* title, const char* message,
 
     // Calculate total button width
     int totalBtnW = 0;
-    
+
     for (int i = 0; i < buttonCount; i++)
     {
-        totalBtnW += (int)strlen(buttons[i]) + 4; // "[ btn ]"
+        totalBtnW += (int)strlen(buttons[i]) + 4; // " btn " + borders
     }
-                                                
+
     totalBtnW += (buttonCount - 1) * 2; // spacing between buttons
 
     // Box width: max of message width, button width, title width + some padding
@@ -585,60 +585,37 @@ TUI_MessageBox(TUI_Context ctx, const char* title, const char* message,
 
     int boxH = 7; // border(1) + padding(1) + message(1) + padding(1) + buttons(1) + padding(1) + border(1)
 
-    // Center on screen
-    int boxX = (ctx->ScreenWidth - boxW) / 2;
-    int boxY = (ctx->ScreenHeight - boxH) / 2;
-
-    // Save origin
+    // Center on screen (coordinates are relative to current Origin, but we
+    // need absolute screen-center positioning, so zero the origin first).
     TUI_Pos savedOrig = ctx->Origin;
 
     ctx->Origin.X = 0;
     ctx->Origin.Y = 0;
 
-    TUI_Theme theme = TUI_GetActiveTheme(ctx);
-    TUI_Attr attr = theme.Window.Normal;
-    TUI_Attr shadowAttr = theme.Shadow;
+    int boxX = (ctx->ScreenWidth - boxW) / 2;
+    int boxY = (ctx->ScreenHeight - boxH) / 2;
 
-    // Draw shadow
-    TUI_DrawShadow(ctx, shadowAttr, boxX, boxY, boxW, boxH);
+    // Use the window widget to draw the box, shadow, title, and set up the
+    // interior origin/clip/layout automatically.
+    TUI_WindowBegin(ctx, boxX, boxY, boxW, boxH, title);
 
-    // Draw box with filled interior
-    TUI_FillRect(ctx, attr, boxX, boxY, boxW, boxH, " ");
-    TUI_DrawBox(ctx, attr, boxX, boxY, boxW, boxH, true);
+    // Interior dimensions (inside the 1-cell border)
+    int innerW = boxW - 2;
+    int innerH = boxH - 2;
 
-    // Draw title
-    if (title && title[0])
-    {
-        int tx = boxX + (boxW - titleLen - 2) / 2;
-        TUI_DrawChar(ctx, attr, tx, boxY, " ");
-        TUI_DrawText(ctx, attr, tx + 1, boxY, title);
-        TUI_DrawChar(ctx, attr, tx + 1 + titleLen, boxY, " ");
-    }
+    // Message on the first content row (row 1 inside interior = 1 row of padding)
+    TUI_LayoutSetCursor(ctx, (innerW - msgLen) / 2, 1);
+    TUI_Label(ctx, message);
 
-    // Draw message centered
-    int mx = boxX + (boxW - msgLen) / 2;
-    TUI_DrawText(ctx, attr, mx, boxY + 2, message);
+    // Buttons on the last content row (1 row of padding from bottom border)
+    TUI_LayoutSetCursor(ctx, (innerW - totalBtnW) / 2, innerH - 2);
+    TUI_LayoutRowBegin(ctx);
 
-    // Draw buttons centered at bottom
-    int btnY = boxY + boxH - 2;
-    int btnX = boxX + (boxW - totalBtnW) / 2;
     int result = -1;
-
-    ctx->Origin.X = 0;
-    ctx->Origin.Y = 0;
-
-    // Switch to horizontal layout for button row; position cursor at the
-    // first button's location (relative to the zeroed origin).
-    ctx->LayoutDir    = TUI_DIRECTION_HORIZONTAL;
-    ctx->RowMaxHeight = 0;
-    ctx->Cursor.X     = btnX;
-    ctx->Cursor.Y     = btnY;
-    ctx->Indent       = 0;
-    ctx->AlignCenter  = false;
 
     for (int i = 0; i < buttonCount; i++)
     {
-        int btnW     = (int)strlen(buttons[i]) + 4;
+        int      btnW  = (int)strlen(buttons[i]) + 4;
         uint32_t btnId = TUI_Id(buttons[i]) ^ (uint32_t)(i + 1);
 
         if (TUI_Button(ctx, btnId, btnW, buttons[i]))
@@ -652,6 +629,9 @@ TUI_MessageBox(TUI_Context ctx, const char* title, const char* message,
             TUI_LayoutSpace(ctx, 2);
         }
     }
+
+    TUI_LayoutRowEnd(ctx);
+    TUI_WindowEnd(ctx);
 
     ctx->Origin = savedOrig;
 
