@@ -70,7 +70,7 @@ TUI_Theme TUI_GetClassicTheme(void)
     theme.Button.Active = TUI_MakeAttr(TUI_COLOR_BLACK,  TUI_COLOR_GREEN, TUI_TEXT_BOLD);
 
     // --- Input fields ---
-    theme.Input.Normal = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_LIGHTGRAY, TUI_TEXT_BOLD);
+    theme.Input.Normal = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_DARKGRAY, TUI_TEXT_BOLD);
     theme.Input.Hot    = TUI_MakeAttr(TUI_COLOR_BLUE,  TUI_COLOR_WHITE, TUI_TEXT_BOLD);
     theme.Input.Active = TUI_MakeAttr(TUI_COLOR_WHITE, TUI_COLOR_BLUE, TUI_TEXT_BOLD);
 
