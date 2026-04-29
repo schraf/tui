@@ -59,7 +59,7 @@ struct TUI_Context
     uint32_t LastId;      // Last interactive widget ID this frame (for wrap)
     uint32_t NextFocusId; // Calculated next focus target (for Tab)
     uint32_t PrevFocusId; // Calculated prev focus target (for Shift+Tab)
-    bool     FocusChanged;
+    bool     FocusLocked;
 
     // --- Screen Dimensions ---
     int  ScreenWidth;  // Total terminal columns
@@ -163,6 +163,9 @@ TUI_Pos TUI_LayoutGetCursor(TUI_Context ctx, int widgetW);
 // Register a widget ID for focus chain tracking.
 // Call this from every interactive widget. Returns true if this widget has focus.
 bool TUI_FocusRegister(TUI_Context ctx, uint32_t id);
+
+// Resets the focus chain variables for the frame
+void TUI_ResetFocusChain(TUI_Context ctx);
 
 // ╭────────────────────────────────────────────────────────────────────╮
 // │ Terminal Escape Codes                                              │

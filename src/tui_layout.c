@@ -25,9 +25,23 @@ TUI_GetFocus(TUI_Context ctx)
     return ctx->FocusId;
 }
 
+void
+TUI_ResetFocusChain(TUI_Context ctx)
+{
+    ctx->FirstId     = 0;
+    ctx->LastId      = 0;
+    ctx->NextFocusId = 0;
+    ctx->PrevFocusId = 0;
+}
+
 bool
 TUI_FocusRegister(TUI_Context ctx, uint32_t id)
 {
+    if (ctx->FocusLocked)
+    {
+        return id == ctx->FocusId;
+    }
+
     // Track first and last widget IDs for wrap-around
     if (ctx->FirstId == 0)
     {

@@ -611,7 +611,11 @@ TUI_MessageBox(TUI_Context ctx, const char* title, const char* message,
     TUI_LayoutSetCursor(ctx, (innerW - totalBtnW) / 2, innerH - 2);
     TUI_LayoutRowBegin(ctx);
 
+    // Reset the focus chain so we can lock it to this message box
+    TUI_ResetFocusChain(ctx);
+
     int result = -1;
+    bool foundFocused = false;
 
     for (int i = 0; i < buttonCount; i++)
     {
@@ -623,10 +627,31 @@ TUI_MessageBox(TUI_Context ctx, const char* title, const char* message,
             result = i;
         }
 
+        if (ctx->FocusId == btnId)
+        {
+            foundFocused = true;
+        }
+
         // Add spacing between buttons (except after the last one)
         if (i < buttonCount - 1)
         {
             TUI_LayoutSpace(ctx, 2);
+        }
+    }
+
+    // Lock focus to this message box
+    ctx->FocusLocked = true;
+
+    // Focus on first element if last focus was not found
+    if (!foundFocused)
+    {
+        if (buttonCount > 0)
+        {
+            ctx->FocusId = TUI_Id(buttons[0]) ^ 1;
+        }
+        else
+        {
+            ctx->FocusId = 0;
         }
     }
 

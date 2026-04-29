@@ -149,11 +149,8 @@ TUI_Begin(TUI_Context ctx)
     ctx->HotId = 0;
 
     // Reset focus chain tracking for this frame
-    ctx->FirstId      = 0;
-    ctx->LastId       = 0;
-    ctx->NextFocusId  = 0;
-    ctx->PrevFocusId  = 0;
-    ctx->FocusChanged = false;
+    TUI_ResetFocusChain(ctx);
+    ctx->FocusLocked = false;
 
     // Reset layout
     ctx->Origin.X         = 0;
