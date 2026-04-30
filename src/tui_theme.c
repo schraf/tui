@@ -56,8 +56,8 @@ TUI_Theme TUI_GetClassicTheme(void)
 
     // --- Title Bar Style ---
     theme.TitleBar.Normal = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_LIGHTGRAY, TUI_TEXT_BOLD);
-    theme.TitleBar.Hot    = theme.TitleBar.Normal;
-    theme.TitleBar.Active = theme.TitleBar.Normal;
+    theme.TitleBar.Hot    = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_LIGHTGRAY, TUI_TEXT_BOLD);
+    theme.TitleBar.Active = TUI_MakeAttr(TUI_COLOR_WHITE, TUI_COLOR_BLACK, TUI_TEXT_BOLD);
 
     // --- Status Bar Style ---
     theme.StatusBar.Normal = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_LIGHTGRAY, TUI_TEXT_BOLD);
@@ -75,14 +75,14 @@ TUI_Theme TUI_GetClassicTheme(void)
     theme.Input.Active = TUI_MakeAttr(TUI_COLOR_WHITE, TUI_COLOR_BLUE, TUI_TEXT_BOLD);
 
     // --- Labels ---
-    theme.Label.Normal = TUI_MakeAttr(TUI_COLOR_BLACK,  TUI_COLOR_LIGHTGRAY, 0);
-    theme.Label.Hot    = TUI_MakeAttr(TUI_COLOR_YELLOW, TUI_COLOR_LIGHTGRAY, 0);
-    theme.Label.Active = TUI_MakeAttr(TUI_COLOR_BLACK,  TUI_COLOR_LIGHTGRAY, 0);
+    theme.Label.Normal = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_LIGHTGRAY, 0);
+    theme.Label.Hot    = TUI_MakeAttr(TUI_COLOR_WHITE, TUI_COLOR_BLACK, 0);
+    theme.Label.Active = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_LIGHTGRAY, 0);
 
     // --- List Selections ---
-    theme.Selection.Normal = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_CYAN, 0);
-    theme.Selection.Hot    = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_WHITE, 0);
-    theme.Selection.Active = TUI_MakeAttr(TUI_COLOR_WHITE, TUI_COLOR_BLACK, 0);
+    theme.Selection.Normal = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_LIGHTGRAY, 0);
+    theme.Selection.Hot    = TUI_MakeAttr(TUI_COLOR_WHITE, TUI_COLOR_BLACK, TUI_TEXT_BOLD);
+    theme.Selection.Active = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_LIGHTGRAY, TUI_TEXT_BOLD);
 
     // --- Progress Bar ---
     theme.ProgressBar.Normal = TUI_MakeAttr(TUI_COLOR_DARKGRAY, TUI_COLOR_LIGHTGRAY, 0);

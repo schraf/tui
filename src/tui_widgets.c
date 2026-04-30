@@ -126,8 +126,7 @@ TUI_Checkbox(TUI_Context ctx, uint32_t id, const char* label, bool* value)
 // ╰────────────────────────────────────────────────────────────────────╯
 
 bool
-TUI_RadioButton(TUI_Context ctx, uint32_t id,
-                const char* label, int* selected, int value)
+TUI_RadioButton(TUI_Context ctx, uint32_t id, const char* label, int* selected, int value)
 {
     bool focused = TUI_FocusRegister(ctx, id);
     bool changed = false;
@@ -162,6 +161,51 @@ TUI_RadioButton(TUI_Context ctx, uint32_t id,
     TUI_DrawChar(ctx, attr, x + 2, y, ")");
     TUI_DrawChar(ctx, attr, x + 3, y, " ");
     TUI_DrawText(ctx, attr, x + 4, y, label);
+
+    TUI_LayoutAdvance(ctx, w, 1);
+
+    return changed;
+}
+
+// ╭────────────────────────────────────────────────────────────────────╮
+// │ TUI_ListItem                                                       │
+// ╰────────────────────────────────────────────────────────────────────╯
+
+bool
+TUI_ListItem(TUI_Context ctx, uint32_t id, const char* label, int* selected, int value)
+{
+    bool focused = TUI_FocusRegister(ctx, id);
+    bool changed = false;
+
+    // Select on Enter or Space
+    if (focused && (ctx->LastKey == TUI_KEY_ENTER || ctx->LastKey == ' '))
+{
+        if (*selected != value)
+        {
+            *selected = value;
+            changed   = true;
+        }
+    }
+
+    bool isSelected = (*selected == value);
+    int w = (int)strlen(label);
+    TUI_Pos pos = TUI_LayoutGetCursor(ctx, w);
+    int x = pos.X;
+    int y = pos.Y;
+
+    TUI_Theme theme = TUI_GetActiveTheme(ctx);
+    TUI_Attr attr = theme.Selection.Normal;
+
+    if (focused)
+    {
+        attr = theme.Selection.Hot;
+    }
+    else if (isSelected)
+    {
+        attr = theme.Selection.Active;
+    }
+
+    TUI_DrawText(ctx, attr, x, y, label);
 
     TUI_LayoutAdvance(ctx, w, 1);
 
@@ -297,163 +341,54 @@ TUI_TextInput(TUI_Context ctx, uint32_t id, int w,
 // ╰────────────────────────────────────────────────────────────────────╯
 
 bool
-TUI_ListBox(TUI_Context ctx, uint32_t id, int w, int h,
-            const char** items, int itemCount,
-            int* selected, int* scrollOffset)
+TUI_ListBox(TUI_Context ctx, uint32_t id, const char** items, int itemCount, int* selected)
 {
-    bool focused = TUI_FocusRegister(ctx, id);
     bool changed = false;
 
-    // Handle keyboard navigation when focused
-    if (focused)
+    TUI_Theme theme = TUI_GetActiveTheme(ctx);
+
+    // ╭────────────────────────────────────────────────────────────────────╮
+    // │ Calculate width and height of box                                  │
+    // ╰────────────────────────────────────────────────────────────────────╯
+
+    int w = 0;
+    int h = itemCount + 2;
+
+    for (int i = 0; i < itemCount; i++)
     {
-        if (ctx->LastKey == TUI_KEY_UP && *selected > 0)
+        int itemLen = strlen(items[i]);
+
+        if (itemLen > w)
         {
-            (*selected)--;
-            changed = true;
-        }
-        else if (ctx->LastKey == TUI_KEY_DOWN && *selected < itemCount - 1)
-        {
-            (*selected)++;
-            changed = true;
-        }
-        else if (ctx->LastKey == TUI_KEY_PGUP)
-        {
-            *selected -= (h - 2);
-            if (*selected < 0) *selected = 0;
-            changed = true;
-        }
-        else if (ctx->LastKey == TUI_KEY_PGDN)
-        {
-            *selected += (h - 2);
-            if (*selected >= itemCount) *selected = itemCount - 1;
-            changed = true;
-        }
-        else if (ctx->LastKey == TUI_KEY_HOME)
-        {
-            *selected = 0;
-            changed   = true;
-        }
-        else if (ctx->LastKey == TUI_KEY_END)
-        {
-            *selected = itemCount - 1;
-            changed   = true;
+            w = itemLen;
         }
     }
 
-    // Ensure selection is valid
-    if (*selected < 0) 
-    {
-        *selected = 0;
-    }
+    w += 2;
 
-    if (*selected >= itemCount) 
-    {
-        *selected = itemCount - 1;
-    }
-
-    // Adjust scroll offset to keep selection visible
-    int visibleRows = h - 2; // Account for top/bottom border
-
-    if (visibleRows < 1) 
-    {
-        visibleRows = 1;
-    }
-
-    if (*selected < *scrollOffset)
-    {
-        *scrollOffset = *selected;
-    }
-
-    if (*selected >= *scrollOffset + visibleRows)
-    {
-        *scrollOffset = *selected - visibleRows + 1;
-    }
-
-    if (*scrollOffset < 0)
-    {
-        *scrollOffset = 0;
-    }
+    // ╭────────────────────────────────────────────────────────────────────╮
+    // │ Draw box                                                           │
+    // ╰────────────────────────────────────────────────────────────────────╯
 
     TUI_Pos pos = TUI_LayoutGetCursor(ctx, w);
-    int x = pos.X;
-    int y = pos.Y;
+    TUI_FillRect(ctx, theme.Window.Normal, pos.X, pos.Y, w, h, " ");
+    TUI_DrawBox(ctx, theme.Window.Normal, pos.X, pos.Y, w, h, false);
 
-    TUI_Theme theme = TUI_GetActiveTheme(ctx);
-    TUI_Attr borderAttr = theme.Input.Normal;
+    // ╭────────────────────────────────────────────────────────────────────╮
+    // │ Draw list items                                                    │
+    // ╰────────────────────────────────────────────────────────────────────╯
     
-    // Draw border
-    TUI_DrawBox(ctx, borderAttr, x, y, w, h, false);
+    TUI_LayoutSetCursor(ctx, pos.X + 1, pos.Y + 1);
 
-    // Draw items
-    int innerW = w - 2;
-
-    for (int row = 0; row < visibleRows && (*scrollOffset + row) < itemCount; row++)
+    for (int i = 0; i < itemCount; i++)
     {
-        int itemIdx = *scrollOffset + row;
-        bool isSelected = (itemIdx == *selected);
-
-        TUI_Attr itemAttr;
-        if (isSelected && focused)
+        uint32_t id = TUI_Id(items[i]) ^ (i + 1);
+        
+        if (TUI_ListItem(ctx, id, items[i], selected, i))
         {
-            itemAttr = theme.Selection.Active;
-        }
-        else if (isSelected)
-        {
-            itemAttr = theme.Selection.Normal;
-        }
-        else
-        {
-            itemAttr = borderAttr;
-        }
-
-        // Draw item text, truncated and padded to fill width
-        const char* item    = items[itemIdx];
-        int         itemLen = (int)strlen(item);
-
-        for (int col = 0; col < innerW; col++)
-        {
-            if (col < itemLen)
-            {
-                char temp[2] = { item[col], '\0' };
-                TUI_DrawChar(ctx, itemAttr, x + 1 + col, y + 1 + row, temp);
-            }
-            else
-            {
-                TUI_DrawChar(ctx, itemAttr, x + 1 + col, y + 1 + row, " ");
-            }
+            changed = true;
         }
     }
-
-    // Draw scrollbar indicator on right border if content overflows
-    if (itemCount > visibleRows)
-    {
-        int thumbPos = 0;
-
-        if (itemCount > 1)
-        {
-            thumbPos = (*scrollOffset * (visibleRows - 1)) / (itemCount - visibleRows);
-        }
-
-        if (thumbPos < 0) 
-        {
-            thumbPos = 0;
-        }
-
-        if (thumbPos >= visibleRows) 
-        {
-            thumbPos = visibleRows - 1;
-        }
-
-        // Draw scrollbar track and thumb on the right border
-        for (int row = 0; row < visibleRows; row++)
-        {
-            const char* ch = (row == thumbPos) ? "\u2588" : "\u2502";
-            TUI_DrawChar(ctx, borderAttr, x + w - 1, y + 1 + row, ch);
-        }
-    }
-
-    TUI_LayoutAdvance(ctx, w, h);
 
     return changed;
 }
@@ -462,48 +397,36 @@ TUI_ListBox(TUI_Context ctx, uint32_t id, int w, int h,
 // │ TUI_MenuBar                                                        │
 // ╰────────────────────────────────────────────────────────────────────╯
 
-void
+bool
 TUI_MenuBar(TUI_Context ctx, const char** items, int itemCount, int* selected)
 {
-    // MenuBar is drawn at absolute row 0, ignoring Origin
-    TUI_Pos  savedOrig  = ctx->Origin;
-    ctx->Origin.X = 0;
-    ctx->Origin.Y = 0;
+    bool changed = false;
 
     TUI_Theme theme = TUI_GetActiveTheme(ctx);
-    TUI_Attr bgAttr = theme.Window.Normal;
-    TUI_Attr selAttr = theme.Selection.Normal;
+    TUI_Attr bgAttr = theme.TitleBar.Normal;
+    TUI_Attr selAttr = theme.TitleBar.Active;
 
     // Menu bar background: fill the entire top row
     TUI_FillRect(ctx, bgAttr, 0, 0, ctx->ScreenWidth, 1, " ");
 
-    // Handle keyboard: Left/Right to navigate
-    if (ctx->LastKey == TUI_KEY_LEFT && *selected > 0)
-    {
-        (*selected)--;
-    }
-
-    if (ctx->LastKey == TUI_KEY_RIGHT && *selected < itemCount - 1)
-    {
-        (*selected)++;
-    }
-
-    // Draw menu items
-    int xPos = 1;
+    TUI_LayoutSetCursor(ctx, 1, 0);
+    TUI_LayoutRowBegin(ctx);
 
     for (int i = 0; i < itemCount; i++)
     {
-        int itemLen = (int)strlen(items[i]);
-        TUI_Attr itemAttr = (i == *selected) ? selAttr : bgAttr;
+        uint32_t id = TUI_Id(items[i]) ^ (i + 1);
+        
+        if (TUI_ListItem(ctx, id, items[i], selected, i))
+        {
+            changed = true;
+        }
 
-        TUI_DrawChar(ctx, itemAttr, xPos, 0, " ");
-        TUI_DrawText(ctx, itemAttr, xPos + 1, 0, items[i]);
-        TUI_DrawChar(ctx, itemAttr, xPos + 1 + itemLen, 0, " ");
-
-        xPos += itemLen + 3; // " item " + 1 spacing
+        TUI_LayoutAdvance(ctx, 1, 0);
     }
 
-    ctx->Origin = savedOrig;
+    TUI_LayoutRowEnd(ctx);
+
+    return changed;
 }
 
 // ╭────────────────────────────────────────────────────────────────────╮

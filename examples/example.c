@@ -11,6 +11,7 @@
 
 // Application state
 typedef enum {
+    PAGE_THEME,
     PAGE_WELCOME,
     PAGE_LICENSE,
     PAGE_OPTIONS,
@@ -26,7 +27,7 @@ main(void)
     TUI_Init(&ctx);
     
     // State
-    Page  page           = PAGE_WELCOME;
+    Page  page           = PAGE_THEME;
     bool  acceptLicense  = false;
     int   installType    = 0; // 0=Typical, 1=Custom, 2=Minimal
     char  installPath[128] = "/usr/local/myapp";
@@ -59,6 +60,57 @@ main(void)
 
         switch (page)
         {
+        // ── Theme ────────────────────────────────────────────────
+        case PAGE_THEME:
+        {   
+            const char* themes[] = {
+                "Classic",
+                "Paper",
+                "Midnight",
+            };
+
+            static int theme = 0;
+
+            TUI_WindowBegin(ctx, winX, winY, winW, winH, "Theme Selection");
+
+            TUI_LayoutSetCursor(ctx, 1, 1);
+
+            for (int i = 0; i < 3; i++)
+            {
+                TUI_LayoutAlignCenter(ctx);
+
+                if (TUI_ListItem(ctx, TUI_Id(themes[i]), themes[i], &theme, i))
+                {
+                    switch (i)
+                    {
+                        case 0:
+                            TUI_SetTheme(ctx, TUI_GetClassicTheme());
+                            break;
+
+                        case 1:
+                            TUI_SetTheme(ctx, TUI_GetPaperTheme());
+                            break;
+
+                        case 2:
+                            TUI_SetTheme(ctx, TUI_GetMidnightTheme());
+                            break;
+                    }
+                }
+            }
+
+            TUI_LayoutSetCursor(ctx, 42, 13);
+
+            if (TUI_Button(ctx, TUI_Id("next_theme"), 14, "Next"))
+            {
+                page = PAGE_WELCOME;
+            }
+
+            TUI_WindowEnd(ctx);
+
+            break;
+        }
+        break;
+
         // ── Welcome ──────────────────────────────────────────────
         case PAGE_WELCOME:
         {

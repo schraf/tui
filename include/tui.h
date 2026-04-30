@@ -173,6 +173,12 @@ void TUI_SetFocus(TUI_Context ctx, uint32_t id);
 // Get the currently focused widget ID.
 uint32_t TUI_GetFocus(TUI_Context ctx);
 
+// Disable focus on widgets
+void TUI_BeginDisabled(TUI_Context ctx);
+
+// Reenable focusability on widgets
+void TUI_EndDisabled(TUI_Context ctx);
+
 // ╭────────────────────────────────────────────────────────────────────╮
 // │ Widgets                                                            │
 // ╰────────────────────────────────────────────────────────────────────╯
@@ -188,8 +194,11 @@ bool TUI_Checkbox(TUI_Context ctx, uint32_t id, const char* label, bool* value);
 
 // Radio button. Returns true if selection changed.
 // `selected` points to the group's selected value; `value` is this button's value.
-bool TUI_RadioButton(TUI_Context ctx, uint32_t id,
-                     const char* label, int* selected, int value);
+bool TUI_RadioButton(TUI_Context ctx, uint32_t id, const char* label, int* selected, int value);
+
+// Returns true if selection changed.
+// `selected` points to the group's selected value; `value` is this list item's value.
+bool TUI_ListItem(TUI_Context ctx, uint32_t id, const char* label, int* selected, int value);
 
 // A simple progress bar (0.0f to 1.0f)
 void TUI_ProgressBar(TUI_Context ctx, int w, float fraction);
@@ -199,13 +208,10 @@ bool TUI_TextInput(TUI_Context ctx, uint32_t id, int w,
                    char* buffer, int bufferSize);
 
 // Scrollable list box. Returns true if selection changed.
-bool TUI_ListBox(TUI_Context ctx, uint32_t id, int w, int h,
-                 const char** items, int itemCount,
-                 int* selected, int* scrollOffset);
+bool TUI_ListBox(TUI_Context ctx, uint32_t id, const char** items, int itemCount, int* selected);
 
-// Menu bar drawn at the top of the screen.
-void TUI_MenuBar(TUI_Context ctx, const char** items, int itemCount,
-                 int* selected);
+// Menu bar drawn at the top of the screen. Returns true if selection changed
+bool TUI_MenuBar(TUI_Context ctx, const char** items, int itemCount, int* selected);
 
 // Title bar drawn at the top of the screen.
 void TUI_TitleBar(TUI_Context ctx, const char* text);

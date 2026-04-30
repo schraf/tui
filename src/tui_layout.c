@@ -25,18 +25,34 @@ TUI_GetFocus(TUI_Context ctx)
     return ctx->FocusId;
 }
 
+void TUI_BeginDisabled(TUI_Context ctx)
+{
+    ctx->FocusDisabled = true;
+}
+
+void TUI_EndDisabled(TUI_Context ctx)
+{
+    ctx->FocusDisabled = false;
+}
+
 void
 TUI_ResetFocusChain(TUI_Context ctx)
 {
-    ctx->FirstId     = 0;
-    ctx->LastId      = 0;
-    ctx->NextFocusId = 0;
-    ctx->PrevFocusId = 0;
+    ctx->FirstId      = 0;
+    ctx->LastId       = 0;
+    ctx->NextFocusId  = 0;
+    ctx->PrevFocusId  = 0;
+    ctx->FoundFocused = false;
 }
 
 bool
 TUI_FocusRegister(TUI_Context ctx, uint32_t id)
 {
+    if (ctx->FocusDisabled)
+    {
+        return false;
+    }
+
     if (ctx->FocusLocked)
     {
         return id == ctx->FocusId;
@@ -48,8 +64,6 @@ TUI_FocusRegister(TUI_Context ctx, uint32_t id)
         ctx->FirstId = id;
     }
 
-    ctx->LastId = id;
-
     // If nothing is focused yet, focus the first interactive widget
     if (ctx->FocusId == 0)
     {
@@ -57,29 +71,19 @@ TUI_FocusRegister(TUI_Context ctx, uint32_t id)
     }
 
     // Build the focus chain: find what comes after and before the current focus
-    static uint32_t s_PrevId       = 0;
-    static bool     s_FoundCurrent = false;
-
-    // Reset statics at the start of each frame (when FirstId just got set to this id)
-    if (ctx->FirstId == id)
-    {
-        s_PrevId       = 0;
-        s_FoundCurrent = false;
-    }
-
     if (id == ctx->FocusId)
     {
-        // This is the currently focused widget
-        s_FoundCurrent   = true;
-        ctx->PrevFocusId = s_PrevId;
+        ctx->FoundFocused = true;
+        ctx->PrevFocusId  = ctx->LastId;
     }
-    else if (s_FoundCurrent && ctx->NextFocusId == 0)
+    else if (ctx->FoundFocused && ctx->NextFocusId == 0)
     {
         // First widget after the focused one
         ctx->NextFocusId = id;
     }
 
-    s_PrevId = id;
+    ctx->LastId = id;
+
 
     return id == ctx->FocusId;
 }
@@ -119,11 +123,11 @@ TUI_LayoutAdvance(TUI_Context ctx, int w, int h)
 
     if (ctx->LayoutDir == TUI_DIRECTION_VERTICAL)
     {
-        ctx->Cursor.Y += h + ctx->Margin;
+        ctx->Cursor.Y += h;
     }
     else // HORIZONTAL
     {
-        ctx->Cursor.X += w + ctx->Margin;
+        ctx->Cursor.X += w + ctx->Indent;
 
         if (h > ctx->RowMaxHeight)
         {
@@ -156,7 +160,7 @@ TUI_LayoutRowEnd(TUI_Context ctx)
     ctx->LayoutDir = TUI_DIRECTION_VERTICAL;
     
     // Advance Y past the tallest widget in the row
-    ctx->Cursor.Y += ctx->RowMaxHeight + ctx->Margin;
+    ctx->Cursor.Y += ctx->RowMaxHeight;
     ctx->Cursor.X  = 0; // Reset X to left edge (indent re-applied by GetCursor)
     
     ctx->RowMaxHeight = 0;

@@ -39,8 +39,7 @@ TUI_Init(TUI_Context* ctx)
     *ctx = (TUI_Context)calloc(1, sizeof(struct TUI_Context));
     TUI_Context c = *ctx;
 
-    // Default margin between widgets
-    c->Margin    = 0;
+    // Default layout direction
     c->LayoutDir = TUI_DIRECTION_VERTICAL;
 
     // Style and Themes
@@ -172,8 +171,13 @@ TUI_Begin(TUI_Context ctx)
 void
 TUI_End(TUI_Context ctx)
 {
+    if (!ctx->FoundFocused)
+    {
+        ctx->FocusId = ctx->FirstId;
+    }
+
     // Handle Tab / Shift+Tab focus navigation after all widgets have registered
-    if (ctx->LastKey == TUI_KEY_TAB)
+    if (ctx->LastKey == TUI_KEY_TAB || ctx->LastKey == TUI_KEY_DOWN || ctx->LastKey == TUI_KEY_RIGHT)
     {
         if (ctx->NextFocusId != 0)
         {
@@ -184,7 +188,7 @@ TUI_End(TUI_Context ctx)
             ctx->FocusId = ctx->FirstId; // Wrap around
         }
     }
-    else if (ctx->LastKey == TUI_KEY_BACKTAB)
+    else if (ctx->LastKey == TUI_KEY_BACKTAB || ctx->LastKey == TUI_KEY_UP || ctx->LastKey == TUI_KEY_LEFT)
     {
         if (ctx->PrevFocusId != 0)
         {

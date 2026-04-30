@@ -54,12 +54,14 @@ struct TUI_Context
     uint32_t HotId;    // ID of the widget currently under the hover/cursor
 
     // --- Focus ---
-    uint32_t FocusId;     // Widget that currently has keyboard focus
-    uint32_t FirstId;     // First interactive widget ID this frame (for wrap)
-    uint32_t LastId;      // Last interactive widget ID this frame (for wrap)
-    uint32_t NextFocusId; // Calculated next focus target (for Tab)
-    uint32_t PrevFocusId; // Calculated prev focus target (for Shift+Tab)
-    bool     FocusLocked;
+    uint32_t FocusId;       // Widget that currently has keyboard focus
+    uint32_t FirstId;       // First interactive widget ID this frame (for wrap)
+    uint32_t LastId;        // Last interactive widget ID this frame (for wrap)
+    uint32_t NextFocusId;   // Calculated next focus target (for Tab)
+    uint32_t PrevFocusId;   // Calculated prev focus target (for Shift+Tab)
+    bool     FoundFocused;  // True if the FocusId widget was found
+    bool     FocusDisabled; // True if we should skip registering widgets
+    bool     FocusLocked;   // Used to prevent any new focus widgets
 
     // --- Screen Dimensions ---
     int  ScreenWidth;  // Total terminal columns
@@ -92,7 +94,6 @@ struct TUI_Context
     int           LastWidgetWidth;
     int           LastWidgetHeight;
     int           RowMaxHeight;    // Tallest widget in current horizontal row
-    int           Margin;          // Default padding between widgets
     TUI_Direction LayoutDir;
     int           Indent;          // Persistent X indent applied at each new line
     bool          AlignCenter;     // One-shot: center the next widget horizontally
