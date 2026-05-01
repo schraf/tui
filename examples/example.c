@@ -117,7 +117,7 @@ main(void)
             TUI_WindowBegin(ctx, winX, winY, winW, winH, "Setup - MyApp v1.0");
 
             TUI_LayoutSetCursor(ctx, 1, 1);
-            TUI_Label(ctx, "Welcome to the MyApp Setup Wizard.");
+            TUI_Title(ctx, "Welcome to the MyApp Setup Wizard.");
             TUI_LayoutSpace(ctx, 1);
             TUI_Label(ctx, "This wizard will guide you through");
             TUI_Label(ctx, "the installation of MyApp on your");

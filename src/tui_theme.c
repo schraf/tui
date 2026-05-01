@@ -79,6 +79,11 @@ TUI_Theme TUI_GetClassicTheme(void)
     theme.Label.Hot    = TUI_MakeAttr(TUI_COLOR_WHITE, TUI_COLOR_BLACK, 0);
     theme.Label.Active = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_LIGHTGRAY, 0);
 
+    // --- Titles ---
+    theme.Title.Normal = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_LIGHTGRAY, TUI_TEXT_BOLD);
+    theme.Title.Hot    = TUI_MakeAttr(TUI_COLOR_WHITE, TUI_COLOR_BLACK, TUI_TEXT_BOLD);
+    theme.Title.Active = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_LIGHTGRAY, TUI_TEXT_BOLD);
+
     // --- List Selections ---
     theme.Selection.Normal = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_LIGHTGRAY, 0);
     theme.Selection.Hot    = TUI_MakeAttr(TUI_COLOR_WHITE, TUI_COLOR_BLACK, TUI_TEXT_BOLD);
@@ -131,6 +136,11 @@ TUI_Theme TUI_GetPaperTheme(void)
     theme.Label.Hot    = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_WHITE, 0);
     theme.Label.Active = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_WHITE, 0);
 
+    // --- Titles ---
+    theme.Title.Normal = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_WHITE, TUI_TEXT_BOLD);
+    theme.Title.Hot    = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_WHITE, TUI_TEXT_BOLD);
+    theme.Title.Active = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_WHITE, TUI_TEXT_BOLD);
+
     // --- List Selections ---
     theme.Selection.Normal = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_LIGHTGRAY, 0);
     theme.Selection.Hot    = TUI_MakeAttr(TUI_COLOR_BLACK, TUI_COLOR_LIGHTGRAY, TUI_TEXT_BOLD);
@@ -182,6 +192,11 @@ TUI_Theme TUI_GetMidnightTheme(void)
     theme.Label.Normal = TUI_MakeAttr(TUI_COLOR_GREEN, TUI_COLOR_BLACK, 0);
     theme.Label.Hot    = TUI_MakeAttr(TUI_COLOR_GREEN, TUI_COLOR_BLACK, 0);
     theme.Label.Active = TUI_MakeAttr(TUI_COLOR_GREEN, TUI_COLOR_BLACK, 0);
+
+    // --- Titles ---
+    theme.Title.Normal = TUI_MakeAttr(TUI_COLOR_GREEN, TUI_COLOR_BLACK, TUI_TEXT_BOLD);
+    theme.Title.Hot    = TUI_MakeAttr(TUI_COLOR_GREEN, TUI_COLOR_BLACK, TUI_TEXT_BOLD);
+    theme.Title.Active = TUI_MakeAttr(TUI_COLOR_GREEN, TUI_COLOR_BLACK, TUI_TEXT_BOLD);
 
     // --- List Selections ---
     theme.Selection.Normal = TUI_MakeAttr(TUI_COLOR_GREEN, TUI_COLOR_BLACK, 0);

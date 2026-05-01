@@ -130,6 +130,7 @@ typedef struct {
     TUI_Style StatusBar;   // Bottom status bar
     TUI_Style Button;      // Standard buttons
     TUI_Style Input;       // Text fields and checkboxes
+    TUI_Style Title;       // Static title text
     TUI_Style Label;       // Static text
     TUI_Style Selection;   // Highlighted items in lists/menus
     TUI_Style ProgressBar; // Progress bar
@@ -185,6 +186,9 @@ void TUI_EndDisabled(TUI_Context ctx);
 
 // Returns true if activated (Enter pressed while focused)
 bool TUI_Button(TUI_Context ctx, uint32_t id, int w, const char* label);
+
+// Static title text display
+void TUI_Title(TUI_Context ctx, const char* text);
 
 // Static text display
 void TUI_Label(TUI_Context ctx, const char* text);

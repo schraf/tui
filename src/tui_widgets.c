@@ -24,6 +24,20 @@ TUI_Label(TUI_Context ctx, const char* text)
 }
 
 // ╭────────────────────────────────────────────────────────────────────╮
+// │ TUI_Title                                                          │
+// ╰────────────────────────────────────────────────────────────────────╯
+
+void
+TUI_Title(TUI_Context ctx, const char* text)
+{
+    int w = (int)strlen(text);
+    TUI_Pos pos = TUI_LayoutGetCursor(ctx, w);
+    TUI_Theme theme = TUI_GetActiveTheme(ctx);
+    TUI_DrawText(ctx, theme.Title.Normal, pos.X, pos.Y, text);
+    TUI_LayoutAdvance(ctx, w, 1);
+}
+
+// ╭────────────────────────────────────────────────────────────────────╮
 // │ TUI_Button                                                         │
 // ╰────────────────────────────────────────────────────────────────────╯
 
